@@ -122,6 +122,7 @@ code Main
         i : int
       monMutex = new Mutex
       monCon = new Condition
+      status = new array of int
       for i = 0 to 4
         status[i] = 2  -- all philosphers are thinking
       endFor

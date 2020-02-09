@@ -140,7 +140,7 @@ code Main
       right = (p + 1) % 5
       while (status[left] == 1) || (status[right] == 1)
         monMutex.Unlock()
-        condition.Wait(&monMutex)
+        monCon.Wait(&monMutex)
         monMutex.Lock()
       endWhile
       status[p]= 1
@@ -158,10 +158,10 @@ code Main
       left = (p + 4) % 5
       right = (p + 1) % 5
       if status[left] == 0
-        condition.Broadcast(&monMutex)
+        monCon.Broadcast(&monMutex)
       endIf
       if status[right] == 0
-        condition.Broadcast(&monMutex)
+        monCon.Broadcast(&monMutex)
       endIf
       monMutex.Unlock()
       endMethod

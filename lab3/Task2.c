@@ -151,7 +151,7 @@ code Main
 
         sb.customerStatus[p] = 'B'
         sb.printCustomerStatus(p)   -- customer p begins haircut
-        currentThread.Yield()       -- imitate the time for hair cut,
+        -- currentThread.Yield()       -- imitate the time for hair cut,
                                     -- yield current thread to some other customers
 
         sb.customerStatus[p] = 'F'

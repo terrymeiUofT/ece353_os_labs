@@ -44,6 +44,7 @@ code Main
     customerSem: Semaphore
     barberSem: Semaphore
     barber_done: Semaphore
+    customerLeave: Semaphore
     access_lock: Mutex
     occupied_chairs: int
     -- Hint: Some variables are defined in "Task2.h".
@@ -79,6 +80,8 @@ code Main
     barberSem.Init(0)
     barber_done = new Semaphore
     barber_done.Init(0)
+    customerLeave = new Semaphore
+    customerLeave.Init(0)
 
     access_lock = new Mutex
     access_lock.Init()
@@ -127,7 +130,7 @@ code Main
         barber_done.Down()            -- the barber is now done with the haircut
         sb.barberStatus = End
         sb.printBarberStatus()      -- print barberstatus after a customer thread is done
-        barberSem.Up()
+        customerLeave.Up()
      endWhile
   endFunction
 
@@ -158,7 +161,7 @@ code Main
     else
         access_lock.Unlock()        -- if all chairs are occupied, exit critical section (leave barbershop)
     endIf
-    barberSem.Down()
+    customerLeave.Down()
     sb.customerStatus[p] = 'L'
     sb.printCustomerStatus(p)       -- customer p leaves barber shop
   endFunction

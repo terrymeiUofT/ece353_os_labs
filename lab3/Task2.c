@@ -45,7 +45,7 @@ code Main
     barberSem: Semaphore
     barber_done: Semaphore
     access_lock: Mutex
-    occupied_chairs = 0
+    occupied_chairs: int
     -- Hint: Some variables are defined in "Task2.h".
 
   function sleepingbarber()

@@ -118,10 +118,11 @@ code Main
 
     method Init ()
       -- Initialize so that all philosophers are THINKING.
-      var
-          monMutex : new Mutex
-          monCon : new Condition
-          status : new array of int {5 of 2}
+      monMutex = new Mutex
+      monMutex.Init()
+      monCon = new Condition
+      monCon.Init()
+      status = new array of int {5 of 2}
       endMethod
 
     method PickupForks (p: int)

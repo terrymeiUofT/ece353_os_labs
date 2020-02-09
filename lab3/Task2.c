@@ -127,6 +127,7 @@ code Main
         barber_done.Down()            -- the barber is now done with the haircut
         sb.barberStatus = End
         sb.printBarberStatus()      -- print barberstatus after a customer thread is done
+        barberSem.Up()
      endWhile
   endFunction
 
@@ -157,6 +158,7 @@ code Main
     else
         access_lock.Unlock()        -- if all chairs are occupied, exit critical section (leave barbershop)
     endIf
+    barberSem.Down()
     sb.customerStatus[p] = 'L'
     sb.printCustomerStatus(p)       -- customer p leaves barber shop
   endFunction

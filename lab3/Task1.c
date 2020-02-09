@@ -138,7 +138,7 @@ code Main
       right = (p + 1) % 5
       while (status[left] == 1) || (status[right] == 1)
         monMutex.Unlock()
-        philospher[p].Down()
+        philospher[p].Sleep()
         monMutex.Lock()
       endWhile
       status[p]= 1
@@ -155,10 +155,10 @@ code Main
       left = (p + 4) % 5
       right = (p + 1) % 5
       if status[left] == 0
-        philospher[left].Up()
+        philospher[left].Run()
       endIf
       if status[right] == 0
-        philospher[right].Up()
+        philospher[right].Run()
       endIf
       monMutex.Unlock()
       endMethod

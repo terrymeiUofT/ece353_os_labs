@@ -122,10 +122,7 @@ code Main
         i : int
       monMutex = new Mutex
       monCon = new Condition
-      status = new array of int {5 of int}
-      for i = 0 to 4
-        status[i] = 2  -- all philosphers are thinking
-      endFor
+      status = new array of int {5 of 2}
       endMethod
 
     method PickupForks (p: int)

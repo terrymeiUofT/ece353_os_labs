@@ -48,6 +48,10 @@ code Main
       i: int
       barberTh: Thread
       customersTh: array[nrCustomers] of Thread
+      customerSem: Semaphore
+      barberSem: Semaphore
+      barber_done: Semaphore
+      access_lock: Mutex
 
     -- print initial line
     for i = 0 to nrChairs
@@ -83,27 +87,27 @@ code Main
     barberTh = new Thread
     barberTh.Init("Barber")
     barber.Fork(barber, nrChairs)
-    customersTh = new array of Thread {nrCustomers of Thread}
-    customers[0].Init("Customer 1")
-    customers[0].Fork(customer, 0)
-    customers[1].Init("Customer 2")
-    customers[1].Fork(customer, 1)
-    customers[2].Init("Customer 3")
-    customers[2].Fork(customer, 2)
-    customers[3].Init("Customer 4")
-    customers[3].Fork(customer, 3)
-    customers[4].Init("Customer 5")
-    customers[4].Fork(customer, 4)
-    customers[5].Init("Customer 6")
-    customers[5].Fork(customer, 5)
-    customers[6].Init("Customer 7")
-    customers[6].Fork(customer, 6)
-    customers[7].Init("Customer 8")
-    customers[7].Fork(customer, 7)
-    customers[8].Init("Customer 9")
-    customers[8].Fork(customer, 8)
-    customers[9].Init("Customer 10")
-    customers[9].Fork(customer, 9)
+    customersTh = new array of Thread {nrCustomers of new Thread}
+    customersTh[0].Init("Customer 1")
+    customersTh[0].Fork(customer, 0)
+    customersTh[1].Init("Customer 2")
+    customersTh[1].Fork(customer, 1)
+    customersTh[2].Init("Customer 3")
+    customersTh[2].Fork(customer, 2)
+    customersTh[3].Init("Customer 4")
+    customersTh[3].Fork(customer, 3)
+    customersTh[4].Init("Customer 5")
+    customersTh[4].Fork(customer, 4)
+    customersTh[5].Init("Customer 6")
+    customersTh[5].Fork(customer, 5)
+    customersTh[6].Init("Customer 7")
+    customersTh[6].Fork(customer, 6)
+    customersTh[7].Init("Customer 8")
+    customersTh[7].Fork(customer, 7)
+    customersTh[8].Init("Customer 9")
+    customersTh[8].Fork(customer, 8)
+    customersTh[9].Init("Customer 10")
+    customersTh[9].Fork(customer, 9)
 
   endFunction
 
@@ -130,7 +134,7 @@ code Main
     access_lock.Lock()              -- critical section starts
     sb.customerStatus[p] = 'E'
     sb.printCustomerStatus(p)       -- customer p enters barber shop
-    if occupied_chairs < numChairs
+    if occupied_chairs < nrChairs
         occupied_chairs = occupied_chairs + 1
         sb.availChairs = sb.availChairs - 1
         access_lock.Unlock()        -- critical section ends

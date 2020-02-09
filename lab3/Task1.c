@@ -121,6 +121,7 @@ code Main
       -- Initialize so that all philosophers are THINKING.
       for i = 0 to 4:
         status[i] = 2  -- all philosopheres are thinking
+      endFor
       endMethod
 
     method PickupForks (p: int)
@@ -137,6 +138,7 @@ code Main
         monMutex.Unlock()
         philosopher[p].Down()
         monMutex.Lock()
+      endWhile
       status[p]= 1
       monMutex.Unlock()
       endMethod
@@ -152,8 +154,10 @@ code Main
       right = (i + 1) % 5
       if status[left] == 0
         philosopher[left].Up()
+      endif
       if status[right] == 0:
         philosopher[right].Up()
+      endif
       monMutex.Unlock()
       endMethod
 

@@ -124,7 +124,7 @@ code Main
         sb.printBarberStatus()      -- print barber status before yield to a customer thread
         barberSem.Up()              -- the barber is now ready to start
         currentThread.Yield()       -- imitate the time for haircut
-        barber_done.Up()            -- the barber is now done with the haircut
+        barber_done.Down()            -- the barber is now done with the haircut
         sb.barberStatus = End
         sb.printBarberStatus()      -- print barberstatus after a customer thread is done
      endWhile
@@ -147,13 +147,13 @@ code Main
 
         sb.customerStatus[p] = 'B'
         sb.printCustomerStatus(p)   -- customer p begins haircut
-        -- currentThread.Yield()       -- imitate the time for hair cut,
+        currentThread.Yield()       -- imitate the time for hair cut,
                                     -- yield current thread to some other customers
 
         sb.customerStatus[p] = 'F'
         sb.printCustomerStatus(p)   -- customer p finishes haircut
 
-        barber_done.Down()          -- waiting for barber to be done
+        barber_done.Up()          -- waiting for barber to be done
     else
         access_lock.Unlock()        -- if all chairs are occupied, exit critical section (leave barbershop)
     endIf

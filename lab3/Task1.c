@@ -136,9 +136,7 @@ code Main
       left = (p + 4) % 5
       right = (p + 1) % 5
       while (status[left] == EATING) || (status[right] == EATING)
-        monMutex.Unlock()
         monCon.Wait(&monMutex)
-        monMutex.Lock()
       endWhile
       status[p]= EATING
       mon.PrintAllStatus()
@@ -152,6 +150,7 @@ code Main
         right : int
       monMutex.Lock()
       status[p] = THINKING
+      mon.PrintAllStatus()
       left = (p + 4) % 5
       right = (p + 1) % 5
       if status[left] == HUNGRY

@@ -5,7 +5,6 @@ header Main
   const
     nrCustomers = 10
     nrChairs = 5
-    occupied_chairs = 0
 
   functions
     main ()

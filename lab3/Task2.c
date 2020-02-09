@@ -87,7 +87,7 @@ code Main
 
     barberTh = new Thread
     barberTh.Init("Barber")
-    barber.Fork(barber_f, nrChairs)
+    barberTh.Fork(barber_f, nrChairs)
     customersTh = new array of Thread {nrCustomers of new Thread}
     customersTh[0].Init("Customer 1")
     customersTh[0].Fork(customer_f, 0)
@@ -154,7 +154,7 @@ code Main
         sb.customerStatus[p] = 'F'
         sb.printCustomerStatus(p)   -- customer p finishes haircut
 
-        Barber_done.Down()          -- waiting for barber to be done
+        barber_done.Down()          -- waiting for barber to be done
     else
         access_lock.Unlock()        -- if all chairs are occupied, exit critical section (leave barbershop)
     endIf

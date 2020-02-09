@@ -2,7 +2,7 @@ code Main
 
   -- OS Class: Project 3
   --
-  -- <PUT YOUR NAME HERE>
+  -- <Tianchang Mei>
   --
 
   -- This package contains the following:
@@ -46,6 +46,8 @@ code Main
   function sleepingbarber()
     var
       i: int
+      barberTh: Thread
+      customersTh: array[nrCustomers] of Thread
 
     -- print initial line
     for i = 0 to nrChairs
@@ -63,11 +65,98 @@ code Main
 
     -- Remove the following line in your implementation
     -- This is only an example.
-    sb.printExample()
+    -- sb.printExample()
 
     -- Add more code below.
+    customerSem = new Semaphore
+    customerSem.Init(0)
+    barberSem = new Semaphore
+    barberSem.Init(0)
+    barber_done = new Semaphore
+    barber_done.Init(0)
+
+    access_lock = new Mutex
+    access_lock.Init()
+
+    occupied_chairs = 0
+
+    barberTh = new Thread
+    barberTh.Init('Barber')
+    barber.Fork(barber, nrChairs)
+    customersTh = new array of Thread {nrCustomers of Thread}
+    customers[0].Init("Customer 1")
+    customers[0].Fork(customer, 0)
+    customers[1].Init("Customer 2")
+    customers[1].Fork(customer, 1)
+    customers[2].Init("Customer 3")
+    customers[2].Fork(customer, 2)
+    customers[3].Init("Customer 4")
+    customers[3].Fork(customer, 3)
+    customers[4].Init("Customer 5")
+    customers[4].Fork(customer, 4)
+    customers[5].Init("Customer 6")
+    customers[5].Fork(customer, 5)
+    customers[6].Init("Customer 7")
+    customers[6].Fork(customer, 6)
+    customers[7].Init("Customer 8")
+    customers[7].Fork(customer, 7)
+    customers[8].Init("Customer 9")
+    customers[8].Fork(customer, 8)
+    customers[9].Init("Customer 10")
+    customers[9].Fork(customer, 9)
 
   endFunction
+
+
+  function barber(numChairs: int)
+    while true
+        customerSem.Down()
+        access_lock.Lock()          -- critical section starts
+        occupied_chairs -= 1
+        sb.availChairs += 1
+        access_lock.Unlock()        -- critical section ends
+        sb.barberStatus = Start
+        sb.printBarberStatus()      -- print barber status before yield to a customer thread
+        barberSem.Up()              -- the barber is now ready to start
+        currentThread.Yield()       -- imitate the time for haircut
+        barber_done.Up()            -- the barber is now done with the haircut
+        sb.barberStatus = End
+        sb.printBarberStatus()      -- print barberstatus after a customer thread is done
+     endWhile
+  endFunction
+
+
+  function customer(p: int)
+    access_lock.Lock()              -- critical section starts
+    sb.customerStatus[p] = 'E'
+    sb.printCustomerStatus(p)       -- customer p enters barber shop
+    if occupied_chairs < numChairs
+        occupied_chairs += 1
+        sb.availChairs -= 1
+        access_lock.Unlock()        -- critical section ends
+
+        sb.customerStatus[p] = 'S'
+        sb.printCustomerStatus(p)   -- customer p sits down
+
+        customerSem.Up()            -- one more customer has taken a chair
+        barberSem.Down()            -- waiting for barber to get ready
+
+        sb.customerStatus[p] = 'B'
+        sb.printCustomerStatus(p)   -- customer p begins haircut
+        currentThread.Yield()       -- imitate the time for hair cut,
+                                    -- yield current thread to some other customers
+
+        sb.customerStatus[p] = 'F'
+        sb.printCustomerStatus(p)   -- customer p finishes haircut
+
+        Barber_done.Down()          -- waiting for barber to be done
+    else
+        access_lock.Unlock()        -- if all chairs are occupied, exit critical section (leave barbershop)
+    endIf
+    sb.customerStatus[p] = 'L'
+    sb.printCustomerStatus(p)       -- customer p leaves barber shop
+  endFunction
+
 
   -- implementation of SleepingBarber class
   behavior SleepingBarber

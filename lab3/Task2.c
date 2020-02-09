@@ -118,16 +118,16 @@ code Main
 
   function barber_f(numChairs: int)
     while true
-        customerSem.Down()
         access_lock.Lock()          -- critical section starts
         occupied_chairs = occupied_chairs - 1
         sb.availChairs = sb.availChairs + 1
         access_lock.Unlock()        -- critical section ends
+        customerSem.Down()
         sb.barberStatus = Start
         sb.printBarberStatus()      -- print barber status before yield to a customer thread
         barberSem.Up()              -- the barber is now ready to start
         currentThread.Yield()       -- imitate the time for haircut
-        barber_done.Up()            -- the barber is now done with the haircut
+        barber_done.Down()            -- the barber is now done with the haircut
         sb.barberStatus = End
         sb.printBarberStatus()      -- print barberstatus after a customer thread is done
         customerLeave.Up()
@@ -157,7 +157,7 @@ code Main
         sb.customerStatus[p] = 'F'
         sb.printCustomerStatus(p)   -- customer p finishes haircut
 
-        barber_done.Down()          -- waiting for barber to be done
+        barber_done.Up()          -- waiting for barber to be done
     else
         access_lock.Unlock()        -- if all chairs are occupied, exit critical section (leave barbershop)
     endIf

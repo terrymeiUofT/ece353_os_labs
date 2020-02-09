@@ -138,10 +138,9 @@ code Main
     if occupied_chairs < nrChairs
         occupied_chairs = occupied_chairs + 1
         sb.availChairs = sb.availChairs - 1
-        access_lock.Unlock()        -- critical section ends
-
         sb.customerStatus[p] = 'S'
         sb.printCustomerStatus(p)   -- customer p sits down
+        access_lock.Unlock()        -- critical section ends
 
         customerSem.Up()            -- one more customer has taken a chair
         barberSem.Down()            -- waiting for barber to get ready

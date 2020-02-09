@@ -57,6 +57,7 @@ code Main
   var
     mon: ForkMonitor
     philospher: array [5] of Thread = new array of Thread {5 of new Thread }
+    monMutex: Mutex = new Mutex
 
   function DiningPhilosophers ()
 
@@ -69,6 +70,8 @@ code Main
       mon = new ForkMonitor
       mon.Init ()
       mon.PrintAllStatus ()
+
+      monMutex.Init()
 
       philospher[0].Init ("Plato")
       philospher[0].Fork (PhilosphizeAndEat, 0)
@@ -104,7 +107,7 @@ code Main
   class ForkMonitor
     superclass Object
     fields
-      status: array [5] of int -- For each philosopher: HUNGRY, EATING, or THINKING
+      status: array [5] of int -- For each philosopher: HUNGRY (0), EATING (1), or THINKING (2)
     methods
       Init ()
       PickupForks (p: int)
@@ -116,17 +119,42 @@ code Main
 
     method Init ()
       -- Initialize so that all philosophers are THINKING.
-      -- ...unimplemented...
+      for i = 0 to 4:
+        status[i] = 2  -- all philosopheres are thinking
       endMethod
 
     method PickupForks (p: int)
       -- This method is called when philosopher 'p' wants to eat.
       -- ...unimplemented...
+      var
+        left : int
+        right : int
+      monMutex.Lock()
+      status[p] = 0
+      left = (i + 4) % 5
+      right = (i + 1) % 5
+      while status[left] == 1 or status[right] == 1
+        monMutex.Unlock()
+        philosopher[p].Down()
+        monMutex.Lock()
+      status[p]= 1
+      monMutex.Unlock()
       endMethod
 
     method PutDownForks (p: int)
       -- This method is called when the philosopher 'p' is done eating.
-      -- ...unimplemented...
+      var
+        left : int
+        right : int
+      monMutex.Lock()
+      status[p] = 2
+      left = (i + 4) % 5
+      right = (i + 1) % 5
+      if status[left] == 0
+        philosopher[left].Up()
+      if status[right] == 0:
+        philosopher[right].Up()
+      monMutex.Unlock()
       endMethod
 
     method PrintAllStatus ()

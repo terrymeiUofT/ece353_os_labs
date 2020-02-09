@@ -119,7 +119,7 @@ code Main
 
     method Init ()
       -- Initialize so that all philosophers are THINKING.
-      for i = 0 to 4:
+      for i = 0 to 4
         status[i] = 2  -- all philosopheres are thinking
       endFor
       endMethod
@@ -154,10 +154,10 @@ code Main
       right = (i + 1) % 5
       if status[left] == 0
         philosopher[left].Up()
-      endif
-      if status[right] == 0:
+      endIf
+      if status[right] == 0
         philosopher[right].Up()
-      endif
+      endIf
       monMutex.Unlock()
       endMethod
 

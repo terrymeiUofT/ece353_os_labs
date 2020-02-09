@@ -81,7 +81,7 @@ code Main
     occupied_chairs = 0
 
     barberTh = new Thread
-    barberTh.Init('Barber')
+    barberTh.Init("Barber")
     barber.Fork(barber, nrChairs)
     customersTh = new array of Thread {nrCustomers of Thread}
     customers[0].Init("Customer 1")
@@ -112,8 +112,8 @@ code Main
     while true
         customerSem.Down()
         access_lock.Lock()          -- critical section starts
-        occupied_chairs -= 1
-        sb.availChairs += 1
+        occupied_chairs = occupied_chairs - 1
+        sb.availChairs = sb.availChairs + 1
         access_lock.Unlock()        -- critical section ends
         sb.barberStatus = Start
         sb.printBarberStatus()      -- print barber status before yield to a customer thread
@@ -131,8 +131,8 @@ code Main
     sb.customerStatus[p] = 'E'
     sb.printCustomerStatus(p)       -- customer p enters barber shop
     if occupied_chairs < numChairs
-        occupied_chairs += 1
-        sb.availChairs -= 1
+        occupied_chairs = occupied_chairs + 1
+        sb.availChairs = sb.availChairs - 1
         access_lock.Unlock()        -- critical section ends
 
         sb.customerStatus[p] = 'S'

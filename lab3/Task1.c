@@ -119,8 +119,10 @@ code Main
 
     method Init ()
       -- Initialize so that all philosophers are THINKING.
+      var
+        i : int
       for i = 0 to 4
-        status[i] = 2  -- all philosopheres are thinking
+        status[i] = 2  -- all philosphers are thinking
       endFor
       endMethod
 
@@ -132,11 +134,11 @@ code Main
         right : int
       monMutex.Lock()
       status[p] = 0
-      left = (i + 4) % 5
-      right = (i + 1) % 5
+      left = (p + 4) % 5
+      right = (p + 1) % 5
       while (status[left] == 1) or (status[right] == 1)
         monMutex.Unlock()
-        philosopher[p].Down()
+        philospher[p].Down()
         monMutex.Lock()
       endWhile
       status[p]= 1
@@ -150,13 +152,13 @@ code Main
         right : int
       monMutex.Lock()
       status[p] = 2
-      left = (i + 4) % 5
-      right = (i + 1) % 5
+      left = (p + 4) % 5
+      right = (p + 1) % 5
       if status[left] == 0
-        philosopher[left].Up()
+        philospher[left].Up()
       endIf
       if status[right] == 0
-        philosopher[right].Up()
+        philospher[right].Up()
       endIf
       monMutex.Unlock()
       endMethod

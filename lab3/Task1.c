@@ -104,7 +104,7 @@ code Main
   class ForkMonitor
     superclass Object
     fields
-      status: array [5] of int -- For each philosopher: HUNGRY (0), EATING (1), or THINKING (2)
+      status: array [5] of int -- For each philosopher: HUNGRY, EATING, or THINKING
       monMutex: Mutex
       monCon: Condition
     methods
@@ -122,26 +122,25 @@ code Main
       monMutex.Init()
       monCon = new Condition
       monCon.Init()
-      status = new array of int {5 of 2}
+      status = new array of int {5 of THINKING}
       endMethod
 
     method PickupForks (p: int)
       -- This method is called when philosopher 'p' wants to eat.
-      -- ...unimplemented...
       var
         left : int
         right : int
       monMutex.Lock()
-      status[p] = 0
+      status[p] = HUNGRY
       mon.PrintAllStatus()
       left = (p + 4) % 5
       right = (p + 1) % 5
-      while (status[left] == 1) || (status[right] == 1)
+      while (status[left] == EATING) || (status[right] == EATING)
         monMutex.Unlock()
         monCon.Wait(&monMutex)
         monMutex.Lock()
       endWhile
-      status[p]= 1
+      status[p]= EATING
       mon.PrintAllStatus()
       monMutex.Unlock()
       endMethod
@@ -152,13 +151,13 @@ code Main
         left : int
         right : int
       monMutex.Lock()
-      status[p] = 2
+      status[p] = THINKING
       left = (p + 4) % 5
       right = (p + 1) % 5
-      if status[left] == 0
+      if status[left] == HUNGRY
         monCon.Broadcast(&monMutex)
       endIf
-      if status[right] == 0
+      if status[right] == HUNGRY
         monCon.Broadcast(&monMutex)
       endIf
       monMutex.Unlock()

@@ -136,7 +136,7 @@ code Main
       status[p] = 0
       left = (p + 4) % 5
       right = (p + 1) % 5
-      while (status[left] == 1) or (status[right] == 1)
+      while (status[left] == 1) || (status[right] == 1)
         monMutex.Unlock()
         philospher[p].Down()
         monMutex.Lock()

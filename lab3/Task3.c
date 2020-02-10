@@ -18,7 +18,7 @@ code Main
 ------------------------------- Gaming Parlor ----------------------------------
   var
     GP: GamingParlor = new GamingParlor
-    Players = new array of Thread {8 of new Thread}
+    Players: array [8] of Thread = new array of Thread {8 of new Thread}
     -- Hint: Some variables are defined in "Task3.h".
 
   function gamingparlor()

@@ -2,7 +2,7 @@ code Main
 
   -- OS Class: Project 3
   --
-  -- <PUT YOUR NAME HERE>
+  -- <Tianchang Mei>
   --
 
   -- This package contains the following:
@@ -18,6 +18,7 @@ code Main
 ------------------------------- Gaming Parlor ----------------------------------
   var
     GP: GamingParlor = new GamingParlor
+    Players = new array of Thread {8 of new Thread}
     -- Hint: Some variables are defined in "Task3.h".
 
   function gamingparlor()
@@ -25,30 +26,65 @@ code Main
 
     -- Remove the following line in your implementation
     -- This is only an example.
-    GP.PrintExample()
+    -- GP.PrintExample()
 
     -- Add more code below
-  
+    Players[0].Init("Player A")
+    Players[0].Fork(askFrontDesk, group_names[0], dice_per_group[0])
+    Players[0].Init("Player B")
+    Players[0].Fork(askFrontDesk, group_names[1], dice_per_group[1])
+    Players[0].Init("Player C")
+    Players[0].Fork(askFrontDesk, group_names[2], dice_per_group[2])
+    Players[0].Init("Player D")
+    Players[0].Fork(askFrontDesk, group_names[3], dice_per_group[3])
+    Players[0].Init("Player E")
+    Players[0].Fork(askFrontDesk, group_names[4], dice_per_group[4])
+    Players[0].Init("Player F")
+    Players[0].Fork(askFrontDesk, group_names[5], dice_per_group[5])
+    Players[0].Init("Player G")
+    Players[0].Fork(askFrontDesk, group_names[6], dice_per_group[6])
+    Players[0].Init("Player H")
+    Players[0].Fork(askFrontDesk, group_names[7], dice_per_group[7])
+
+  endFunction
+
+  function askFrontDesk(name: char, nr_of_dice: int)
+    var
+        i: int
+      for i = 0 to 5
+        GP.Request(name, nr_of_dice)
+        currentThread.Yield()
+        GP.Return(name, nr_of_dice)
+      endFor
   endFunction
 
   behavior GamingParlor
 
     method Init()
       dice_available = total_dice
+      monMutex = new Mutex
+      monMutex.Init()
+      monCon = new Condition
+      monCon.Init()
     endMethod
 
     method Request(name: char, nr_of_dice: int)
+      monMutex.Lock()
       self.Print(name, "requests", nr_of_dice)
       while dice_available < nr_of_dice
-        FatalError ("Needs to be implemented")
+        monCon.Wait(&monMutex)
       endWhile
       dice_available = dice_available - nr_of_dice
       self.Print(name, "proceeds with", nr_of_dice)
+      monMutex.Unlock()
     endMethod
 
     method Return(name: char, nr_of_dice: int)
+      monMutex.Lock()
       dice_available = dice_available + nr_of_dice
       self.Print(name, "releases and adds back", nr_of_dice)
+      monCon.Broadcast(&monMutex)
+      monMutex.Unlock()
     endMethod
 
     method PrintExample()

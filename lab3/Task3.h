@@ -17,6 +17,8 @@ header Main
     superclass Object
     fields
       dice_available: int
+      monCon: Condition
+      monMutex: Mutex
     methods
       Init()
       Request(name: char, nr_of_dice: int)

@@ -20,7 +20,7 @@ code Main
     GP: GamingParlor = new GamingParlor
     gpMutex: Mutex
     gpCon: Condition
-    Players: array [8] of Thread = new array of Thread {8 of new Thread}
+    Players: array [8] of Thread
     -- Hint: Some variables are defined in "Task3.h".
 
   function gamingparlor()
@@ -35,6 +35,8 @@ code Main
     gpMutex.Init()
     gpCon = new Condition
     gpCon.Init()
+
+    Players = new array of Thread {8 of new Thread}
 
     Players[0].Init("Player A")
     Players[0].Fork(askFrontDesk, 0)

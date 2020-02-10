@@ -77,22 +77,22 @@ code Main
     endMethod
 
     method Request(name: char, nr_of_dice: int)
-      monMutex.Lock()
+      gpMutex.Lock()
       self.Print(name, "requests", nr_of_dice)
       while dice_available < nr_of_dice
-        monCon.Wait(&monMutex)
+        gpCon.Wait(&monMutex)
       endWhile
       dice_available = dice_available - nr_of_dice
       self.Print(name, "proceeds with", nr_of_dice)
-      monMutex.Unlock()
+      gpMutex.Unlock()
     endMethod
 
     method Return(name: char, nr_of_dice: int)
-      monMutex.Lock()
+      gpMutex.Lock()
       dice_available = dice_available + nr_of_dice
       self.Print(name, "releases and adds back", nr_of_dice)
-      monCon.Broadcast(&monMutex)
-      monMutex.Unlock()
+      gpCon.Broadcast(&monMutex)
+      gpMutex.Unlock()
     endMethod
 
     method PrintExample()

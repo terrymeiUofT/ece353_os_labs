@@ -90,7 +90,7 @@ code Main
 
     barberTh = new Thread
     barberTh.Init("Barber")
-    barberTh.Fork(barber_f, nrChairs)
+    barberTh.Fork(barber_f, 0)
     customersTh = new array of Thread {nrCustomers of new Thread}
     customersTh[0].Init("Customer 1")
     customersTh[0].Fork(customer_f, 0)
@@ -116,7 +116,7 @@ code Main
   endFunction
 
 
-  function barber_f(numChairs: int)
+  function barber_f(p: int)
     while true
         access_lock.Lock()          -- critical section starts
         occupied_chairs = occupied_chairs - 1

@@ -30,28 +30,31 @@ code Main
 
     -- Add more code below
     Players[0].Init("Player A")
-    Players[0].Fork(askFrontDesk, group_names[0], dice_per_group[0])
+    Players[0].Fork(askFrontDesk, 0)
     Players[0].Init("Player B")
-    Players[0].Fork(askFrontDesk, group_names[1], dice_per_group[1])
+    Players[0].Fork(askFrontDesk, 1)
     Players[0].Init("Player C")
-    Players[0].Fork(askFrontDesk, group_names[2], dice_per_group[2])
+    Players[0].Fork(askFrontDesk, 2)
     Players[0].Init("Player D")
-    Players[0].Fork(askFrontDesk, group_names[3], dice_per_group[3])
+    Players[0].Fork(askFrontDesk, 3)
     Players[0].Init("Player E")
-    Players[0].Fork(askFrontDesk, group_names[4], dice_per_group[4])
+    Players[0].Fork(askFrontDesk, 4)
     Players[0].Init("Player F")
-    Players[0].Fork(askFrontDesk, group_names[5], dice_per_group[5])
+    Players[0].Fork(askFrontDesk, 5)
     Players[0].Init("Player G")
-    Players[0].Fork(askFrontDesk, group_names[6], dice_per_group[6])
+    Players[0].Fork(askFrontDesk, 6)
     Players[0].Init("Player H")
-    Players[0].Fork(askFrontDesk, group_names[7], dice_per_group[7])
-
+    Players[0].Fork(askFrontDesk, 7)
   endFunction
 
-  function askFrontDesk(name: char, nr_of_dice: int)
+  function askFrontDesk(p: int)
     var
         i: int
+        name: char
+        nr_of_dice: int
       for i = 0 to 5
+        name = group_names[p]
+        nr_of_dice = dice_per_group[p]
         GP.Request(name, nr_of_dice)
         currentThread.Yield()
         GP.Return(name, nr_of_dice)

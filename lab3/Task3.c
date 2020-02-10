@@ -18,6 +18,8 @@ code Main
 ------------------------------- Gaming Parlor ----------------------------------
   var
     GP: GamingParlor = new GamingParlor
+    gpMutex: Mutex
+    gpCon: Condition
     Players: array [8] of Thread = new array of Thread {8 of new Thread}
     -- Hint: Some variables are defined in "Task3.h".
 
@@ -29,6 +31,11 @@ code Main
     -- GP.PrintExample()
 
     -- Add more code below
+    gpMutex = new Mutex
+    gpMutex.Init()
+    gpCon = new Condition
+    gpCon.Init()
+
     Players[0].Init("Player A")
     Players[0].Fork(askFrontDesk, 0)
     Players[0].Init("Player B")
@@ -65,10 +72,6 @@ code Main
 
     method Init()
       dice_available = total_dice
-      monMutex = new Mutex
-      monMutex.Init()
-      monCon = new Condition
-      monCon.Init()
     endMethod
 
     method Request(name: char, nr_of_dice: int)

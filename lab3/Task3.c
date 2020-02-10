@@ -80,7 +80,7 @@ code Main
       gpMutex.Lock()
       self.Print(name, "requests", nr_of_dice)
       while dice_available < nr_of_dice
-        gpCon.Wait(&monMutex)
+        gpCon.Wait(&gpMutex)
       endWhile
       dice_available = dice_available - nr_of_dice
       self.Print(name, "proceeds with", nr_of_dice)
@@ -91,7 +91,7 @@ code Main
       gpMutex.Lock()
       dice_available = dice_available + nr_of_dice
       self.Print(name, "releases and adds back", nr_of_dice)
-      gpCon.Broadcast(&monMutex)
+      gpCon.Broadcast(&gpMutex)
       gpMutex.Unlock()
     endMethod
 

@@ -138,7 +138,7 @@ code Main
       while (status[left] == EATING) || (status[right] == EATING)
         monCon.Wait(&monMutex)
       endWhile
-      status[p]= EATING
+      status[p] = EATING
       mon.PrintAllStatus()
       monMutex.Unlock()
       endMethod

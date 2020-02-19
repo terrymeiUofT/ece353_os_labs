@@ -1048,9 +1048,7 @@ code Kernel
       ----------  FrameManager . GetNewFrames  ----------
 
       method GetNewFrames (aPageTable: ptr to AddrSpace, numFramesNeeded: int)
-        var i: int
-        var f: int
-        var frameAddr: int
+        var i, f, frameAddr: int
           frameManagerLock.Lock()
           while (framesInUse.NumberOfClearBits() <= numFramesNeeded)
             newFramesAvailable.Wait(&frameManagerLock)
@@ -1068,9 +1066,7 @@ code Kernel
       ----------  FrameManager . ReturnAllFrames  ----------
 
       method ReturnAllFrames (aPageTable: ptr to AddrSpace)
-        var i: int
-        var bitNumber: int
-        var frameAddr: int
+        var i, bitNumber, frameAddr: int
           frameManagerLock.Lock()
           for (i=0; i<aPageTable.numberOfPages; i=i+1)
             frameAddr = aPageTable.ExtractFrameAddr(i)

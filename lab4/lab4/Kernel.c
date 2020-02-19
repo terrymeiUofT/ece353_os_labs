@@ -690,14 +690,14 @@ code Kernel
         -- This method is called once at kernel startup time to initialize
         -- the one and only "ThreadManager" object.
         -- 
+          var i: int
           print ("Initializing Thread Manager...\n")
           threadTable = new array of Thread {MAX_NUMBER_OF_PROCESSES of new Thread}
           freeList = new List [Thread]
           threadManagerLock = new Mutex
           aThreadBecameFree = new Condition
 
-          var i: int
-          for (i=0; i<MAX_NUMBER_OF_PROCESSES; i++)
+          for (i=0; i<MAX_NUMBER_OF_PROCESSES; i=i+1)
             threadTable[i].Init("testThread_%d", i)
             threadTable[i].status = UNUSED
             freeList.AddToEnd(&(threadTable[i]))

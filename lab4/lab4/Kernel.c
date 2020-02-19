@@ -1057,9 +1057,9 @@ code Kernel
             f = framesInUse.FindZeroAndSet()
             frameAddr = PHYSICAL_ADDRESS_OF_FIRST_PAGE_FRAME + (f * PAGE_SIZE)
             aPageTable.SetFrameAddr(i, frameAddr)
-            numberFreeFrames = numberFreeFrames - 1
-            aPageTable.numberOfPages = aPageTable.numberOfPages + 1
           endFor
+          numberFreeFrames = numberFreeFrames - numFramesNeeded
+          aPageTable.numberOfPages = numFramesNeeded
           frameManagerLock.Unlock()
         endMethod
 
@@ -1072,8 +1072,8 @@ code Kernel
             frameAddr = aPageTable.ExtractFrameAddr(i)
             bitNumber = (frameAddr - PHYSICAL_ADDRESS_OF_FIRST_PAGE_FRAME)/(PAGE_SIZE)
             framesInUse.ClearBit(bitNumber)
-            numberFreeFrames = numberFreeFrames + 1
           endFor
+          numberFreeFrames = numberFreeFrames + aPageTable.numberOfPages
           newFramesAvailable.Broadcast(&frameManagerLock)
           frameManagerLock.Unlock()
         endMethod

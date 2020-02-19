@@ -740,12 +740,11 @@ code Kernel
         --
         var newThread: ptr to Thread
           threadManagerLock.Lock()
-          if freeList.IsEmpty()
+          while freeList.IsEmpty()
             aThreadBecameFree.Wait(&threadManagerLock)
-          else
-            newThread = freeList.Remove()
-            (*newThread).status = JUST_CREATED
-          endIf
+          endWhile
+          newThread = freeList.Remove()
+          (*newThread).status = JUST_CREATED
           threadManagerLock.Unlock()
           return newThread
         endMethod

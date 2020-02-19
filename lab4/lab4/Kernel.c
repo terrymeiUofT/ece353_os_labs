@@ -1,6 +1,6 @@
 code Kernel
 
-  -- <PUT YOUR NAME HERE>
+  -- <Tianchang Mei>
 
 -----------------------------  InitializeScheduler  ---------------------------------
 
@@ -691,7 +691,21 @@ code Kernel
         -- the one and only "ThreadManager" object.
         -- 
           print ("Initializing Thread Manager...\n")
-          -- NOT IMPLEMENTED
+          threadTable = new array of Thread {MAX_NUMBER_OF_PROCESSES of new Thread}
+          freeList = new List [Thread]
+          threadManagerLock = new Mutex
+          aThreadBecameFree = new Condition
+
+          var i: int
+          for (i=0; i<MAX_NUMBER_OF_PROCESSES; i++)
+            threadTable[i].Init("testThread_%d", i)
+            threadTable[i].status = UNUSED
+            freeList.AddToEnd(&(threadTable[i]))
+          endFor
+
+          threadManagerLock.Init()
+          aThreadBecameFree.Init()
+
         endMethod
 
       ----------  ThreadManager . Print  ----------
@@ -723,9 +737,17 @@ code Kernel
         -- 
         -- This method returns a new Thread; it will wait
         -- until one is available.
-        -- 
-          -- NOT IMPLEMENTED
-          return null
+        --
+        var newThread: ptr to Thread
+          threadManagerLock.Lock()
+          if freeList.IsEmpty()
+            aThreadBecameFree.Wait(&threadManagerLock)
+          else
+            newThread = freeList.Remove()
+            *newThread.status = JUST_CREATED
+          endIf
+          threadManagerLock.Unlock()
+          return newThread
         endMethod
 
       ----------  ThreadManager . FreeThread  ----------
@@ -734,8 +756,12 @@ code Kernel
         -- 
         -- This method is passed a ptr to a Thread;  It moves it
         -- to the FREE list.
-        -- 
-          -- NOT IMPLEMENTED
+        --
+          threadManagerLock.Lock()
+          *th.status = UNUSED
+          freeList.AddToEnd(th)
+          aThreadBecameFree.Broadcast(&threadManagerLock)
+          threadManagerLock.Unlock()
         endMethod
 
     endBehavior

@@ -848,7 +848,21 @@ code Kernel
         -- This method is called once at kernel startup time to initialize
         -- the one and only "processManager" object.  
         --
-        -- NOT IMPLEMENTED
+        var i: int
+          processTable = new array of ProcessControlBlock {MAX_NUMBER_OF_PROCESSES of new ProcessControlBlock}
+          freeList = new List [ProcessControlBlock]
+          for (i=0; i<MAX_NUMBER_OF_PROCESSES; i=i+1)
+            processTable[i].Init()
+            processTable[i].status = FREE
+            freeList.AddToEnd(&(processTable[i]))
+          endFor
+          processManagerLock = new Mutex
+          processManagerLock.Init()
+          aProcessBecameFree = new Condition
+          aProcessBecameFree.Init()
+          aProcessDied = new Condition
+          aProcessDied.Init()
+          nextPid = 0
         endMethod
 
       ----------  ProcessManager . Print  ----------
@@ -903,8 +917,17 @@ code Kernel
         -- This method returns a new ProcessControlBlock; it will wait
         -- until one is available.
         --
-          -- NOT IMPLEMENTED
-          return null
+          var newProcess: ptr to ProcessControlBlock
+            processManagerLock.Lock()
+            while freeList.IsEmpty()
+              aProcessBecameFree.Wait(&processManagerLock)
+            endWhile
+            newProcess = freeList.Remove()
+            (*newProcess).status = ACTIVE
+            (*newProcess).pid = nextPid
+            nextPid = nextPid + 1
+            processManagerLock.Unlock()
+            return newProcess
         endMethod
 
       ----------  ProcessManager . FreeProcess  ----------
@@ -914,7 +937,11 @@ code Kernel
         -- This method is passed a ptr to a Process;  It moves it
         -- to the FREE list.
         --
-          -- NOT IMPLEMENTED
+          processManagerLock.Lock()
+          (*p).status = FREE
+          freeList.AddToEnd(p)
+          aProcessBecameFree.Signal(&processManagerLock)
+          processManagerLock.Unlock()
         endMethod
 
 

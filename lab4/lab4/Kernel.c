@@ -944,7 +944,6 @@ code Kernel
           processManagerLock.Unlock()
         endMethod
 
-
     endBehavior
 
 -----------------------------  PrintObjectAddr  ---------------------------------
@@ -1049,13 +1048,38 @@ code Kernel
       ----------  FrameManager . GetNewFrames  ----------
 
       method GetNewFrames (aPageTable: ptr to AddrSpace, numFramesNeeded: int)
-          -- NOT IMPLEMENTED
+        var i: int
+        var f: int
+        var frameAddr: int
+          frameManagerLock.Lock()
+          while (framesInUse.NumberOfClearBits() <= numFramesNeeded)
+            newFramesAvailable.Wait(&frameManagerLock)
+          endWhile
+          for (i=0; i<numFramesNeeded; i=i+1)
+            f = framesInUse.FindZeroAndSet()
+            frameAddr = PHYSICAL_ADDRESS_OF_FIRST_PAGE_FRAME + (f * PAGE_SIZE)
+            aPageTable.SetFrameAddr(i, frameAddr)
+            numberFreeFrames = numberFreeFrames - 1
+            aPageTable.numberOfPages = aPageTable.numberOfPages + 1
+          endFor
+          frameManagerLock.Unlock()
         endMethod
 
       ----------  FrameManager . ReturnAllFrames  ----------
 
       method ReturnAllFrames (aPageTable: ptr to AddrSpace)
-          -- NOT IMPLEMENTED
+        var i: int
+        var bitNumber: int
+        var frameAddr: int
+          frameManagerLock.Lock()
+          for (i=0; i<aPageTable.numberOfPages; i=i+1)
+            frameAddr = aPageTable.ExtractFrameAddr(i)
+            bitNumber = (frameAddr - PHYSICAL_ADDRESS_OF_FIRST_PAGE_FRAME)/(PAGE_SIZE)
+            framesInUse.ClearBit(bitNumber)
+            numberFreeFrames = numberFreeFrames + 1
+          endFor
+          newFramesAvailable.Broadcast(&frameManagerLock)
+          frameManagerLock.Unlock()
         endMethod
 
     endBehavior

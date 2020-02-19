@@ -698,7 +698,7 @@ code Kernel
           aThreadBecameFree = new Condition
 
           for (i=0; i<MAX_NUMBER_OF_PROCESSES; i=i+1)
-            threadTable[i].Init("testThread_%d", i)
+            threadTable[i].Init("testThread")
             threadTable[i].status = UNUSED
             freeList.AddToEnd(&(threadTable[i]))
           endFor
@@ -744,7 +744,7 @@ code Kernel
             aThreadBecameFree.Wait(&threadManagerLock)
           else
             newThread = freeList.Remove()
-            *newThread.status = JUST_CREATED
+            (*newThread).status = JUST_CREATED
           endIf
           threadManagerLock.Unlock()
           return newThread
@@ -758,7 +758,7 @@ code Kernel
         -- to the FREE list.
         --
           threadManagerLock.Lock()
-          *th.status = UNUSED
+          (*th).status = UNUSED
           freeList.AddToEnd(th)
           aThreadBecameFree.Broadcast(&threadManagerLock)
           threadManagerLock.Unlock()

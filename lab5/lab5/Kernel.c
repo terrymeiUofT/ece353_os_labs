@@ -1466,7 +1466,7 @@ code Kernel
     -- for the duration of its execution.
     --
 -- Uncomment this code later...
-      //FatalError ("DISK INTERRUPTS NOT EXPECTED IN PROJECT 4")
+      -- FatalError ("DISK INTERRUPTS NOT EXPECTED IN PROJECT 4")
 
       currentInterruptStatus = DISABLED
       -- print ("DiskInterruptHandler invoked!\n")

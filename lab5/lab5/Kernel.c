@@ -1753,40 +1753,40 @@ code Kernel
 		initSystemStackTop: int
 		oldStatus: int
 
-	  oldStatus = SetInterruptsTo (DISABLED)
-
       print ("function Handle_Sys_Exec is invoked")
-      nl()
-	  ret = (*currentThread).myProcess.addrSpace.GetStringFromVirtual(&strBuffer, filename asInteger, MAX_STRING_SIZE)
-	  if temp < 0
+      nl ()
+	  ret = currentThread.myProcess.addrSpace.GetStringFromVirtual (&strBuffer, filename asInteger, MAX_STRING_SIZE)
+	  if ret < 0
 	    FatalError ("Encounter an error when calling GetStringFromVirtual")
 		return -1
 	  endIf
-      print("filename: ")
-	  print(&strBuffer)
-	  nl()
+      print ("filename: ")
+	  print (&strBuffer)
+	  nl ()
 
-	  newAddrSpace.Init()
+	  newAddrSpace.Init ()
 
-	  exeFilePtr = fileManager.Open(&strBuffer)
-	  if exeFilePtr == null
+	  exePtr = fileManager.Open (&strBuffer)
+	  if exePtr == null
 		return -1
 	  endIf
 
-	  initUserPC = exePtr.LoadExecutable(&newAddrSpace)
+	  initUserPC = exePtr.LoadExecutable (&newAddrSpace)
 	  if initUserPC < 0
 		return -1
 	  endIf
+      fileManager.Close (exePtr)
 
-	  frameManager.ReturnAllFrames(&((*currentThread).myProcess.addrSpace))
+	  frameManager.ReturnAllFrames (&(currentThread.myProcess.addrSpace))
 	  currentThread.myProcess.addrSpace = newAddrSpace
-	  fileManager.Close(exePtr)
-	  (*currentThread).isUserThread = true
 
 	  initUserStackTop = (newAddrSpace.numberOfPages) * PAGE_SIZE
 	  initSystemStackTop = & currentThread.systemStack[SYSTEM_STACK_SIZE-1]
-	  newAddrSpace.SetToThisPageTable()
-	  BecomeUserThread(initUserStackTop, entryPoint, initSystemStackTop)
+
+      oldStatus = SetInterruptsTo (DISABLED)
+	  newAddrSpace.SetToThisPageTable ()
+	  currentThread.isUserThread = true
+	  BecomeUserThread (initUserStackTop, initUserPC, initSystemStackTop)
 	  return 3000
     endFunction
 
@@ -1799,7 +1799,7 @@ code Kernel
 
 	  print ("function Handle_Sys_Create is invoked")
       nl()
-	  ret = (*currentThread).myProcess.addrSpace.GetStringFromVirtual(&strBuffer, filename asInteger, MAX_STRING_SIZE)
+	  ret = currentThread.myProcess.addrSpace.GetStringFromVirtual(&strBuffer, filename asInteger, MAX_STRING_SIZE)
 	  if ret < 0
 	    FatalError ("Encounter an error when calling GetStringFromVirtual")
 	  endIf

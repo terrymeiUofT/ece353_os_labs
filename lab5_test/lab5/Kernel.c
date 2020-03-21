@@ -1,6 +1,6 @@
 code Kernel
 
-  -- <Yize Zhao>
+  -- <Tianchang Mei>
 
 -----------------------------  InitializeScheduler  ---------------------------------
 
@@ -199,6 +199,42 @@ code Kernel
         Cleari ()
       endIf
       return oldStat
+    endFunction
+
+-----------------------------  InitFirstProcess  ---------------------------------
+
+  function InitFirstProcess ()
+      var
+        threadPtr: ptr to Thread
+      threadPtr = threadManager.GetANewThread ()
+      threadPtr.Init ("UserProgram")
+      threadPtr.Fork (StartUserProcess, 0)
+    endFunction
+
+  function StartUserProcess ()
+      var
+		pcbPtr: ptr to ProcessControlBlock
+		exePtr: ptr to OpenFile
+		initUserPC: int
+		initUserStackTop: int
+		initSystemStackTop: int
+		oldStatus: int
+
+      pcbPtr = processManager.GetANewProcess()
+      currentThread.myProcess = pcbPtr
+      pcbPtr.myThread = currentThread
+
+      exePtr = fileManager.Open ("TestProgram1")
+      initUserPC = exePtr.LoadExecutable (&(pcbPtr.addrSpace))
+      fileManager.Close (exePtr)
+
+      initUserStackTop = (pcbPtr.addrSpace.numberOfPages) * PAGE_SIZE
+      initSystemStackTop = (& currentThread.systemStack[SYSTEM_STACK_SIZE-1]) asInteger
+
+      oldStatus = SetInterruptsTo (DISABLED)
+      pcbPtr.addrSpace.SetToThisPageTable()
+      currentThread.isUserThread = true
+      BecomeUserThread (initUserStackTop, initUserPC, initSystemStackTop)
     endFunction
 
 -----------------------------  Semaphore  ---------------------------------
@@ -1935,51 +1971,6 @@ code Kernel
       nl()
     endFunction
 
-
------------------------------  InitFirstProcess  ---------------------------------
-
-  function InitFirstProcess ()
-    var
-      p: ptr to Thread
-
-    p = threadManager.GetANewThread()
-    (*p).Init("Test")
-    (*p).Fork(StartUserProcess, 0)
-  endFunction
-
------------------------------  StartUserProcess  ---------------------------------
-
-  function StartUserProcess ()
-    var
-      pPCB: ptr to ProcessControlBlock
-      pOF: ptr to OpenFile
-      initPC: int
-      initUserStackTop: int
-      initSystemStackTop: int
-      oldIntStat: int
-
-
-
-    pPCB = processManager.GetANewProcess()
-    currentThread.myProcess = pPCB
-    pPCB.myThread = currentThread
-    pOF = fileManager.Open("TestProgram1")
-    initPC = (*pOF).LoadExecutable(&(pPCB.addrSpace))
-    fileManager.Close(pOF)
-    initUserStackTop = (pPCB.addrSpace.numberOfPages)*PAGE_SIZE
-    initSystemStackTop = (&(currentThread.systemStack[SYSTEM_STACK_SIZE-1])) asInteger
-
-    -- Disable interrupts;
-    oldIntStat = SetInterruptsTo (DISABLED)
-
-    -- Initialize the page table registers for this virtual addres sspace;
-    pPCB.addrSpace.SetToThisPageTable()
-
-    -- SettheisUserThread variable in the current thread to true;
-    currentThread.isUserThread = true
-    BecomeUserThread (initUserStackTop, initPC, initSystemStackTop)
-
-  endFunction
 -----------------------------  DiskDriver  ---------------------------------
 
   const

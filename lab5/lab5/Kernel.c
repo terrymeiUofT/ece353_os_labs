@@ -224,7 +224,7 @@ code Kernel
 	  pcbPtr.myThread = currentThread
 	  currentThread.myProcess = pcbPtr
 
-	  exePtr = fileManager.Open ("MyProgram")
+	  exePtr = fileManager.Open ("TestProgram1")
 	  initUserPC = exePtr.LoadExecutable (&(pcbPtr.addrSpace))
 	  fileManager.Close (exePtr)
 

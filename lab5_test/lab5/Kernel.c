@@ -1774,45 +1774,44 @@ code Kernel
 -----------------------------  Handle_Sys_Exit  ---------------------------------
 
   function Handle_Sys_Exit (returnStatus: int)
-      -- NOT IMPLEMENTED
-      print("Handel_Sys_Exit invoked! \n")
-      print("returnStatus = ")
-      printInt(returnStatus)
-      nl()
+      print ("function Handle_Sys_Exit is invoked")
+      nl ()
+	  print ("returnStatus: ")
+	  printInt (returnStatus)
+	  nl ()
     endFunction
 
 -----------------------------  Handle_Sys_Shutdown  ---------------------------------
 
   function Handle_Sys_Shutdown ()
-      -- NOT IMPLEMENTED
-      -- FaltalError("FATAL ERROR in UserProgram: \"Syscall 'Shutdown' was invoked by a user thread\" -- TERMINATING!")
-      FatalError("Syscall 'Shutdown' was invoked by a user thread")
-
+      print ("function Handle_Sys_Shutdown is invoked")
+      nl ()
+      FatalError ("Syscall 'Shutdown' was invoked by a user thread")
     endFunction
 
 -----------------------------  Handle_Sys_Yield  ---------------------------------
 
   function Handle_Sys_Yield ()
-      -- NOT IMPLEMENTED
-      print("Handle_Sys_Yield invoked! \n")
+      print ("function Handle_Sys_Yield is invoked")
+      nl ()
     endFunction
 
 -----------------------------  Handle_Sys_Fork  ---------------------------------
 
   function Handle_Sys_Fork () returns int
-      -- NOT IMPLEMENTED
-      print("Handle_Sys_Fork invoked! \n")
+      print ("function Handle_Sys_Fork is invoked")
+      nl ()
       return 1000
     endFunction
 
 -----------------------------  Handle_Sys_Join  ---------------------------------
 
   function Handle_Sys_Join (processID: int) returns int
-      -- NOT IMPLEMENTED
-      print("Handle_Sys_Join invoked! \n")
-      print("processID = ")
-      printInt(processID)
-      nl()
+      print ("function Handle_Sys_Join is invoked")
+      nl ()
+	  print ("processID: ")
+	  printInt (processID)
+	  nl ()
       return 2000
     endFunction
 

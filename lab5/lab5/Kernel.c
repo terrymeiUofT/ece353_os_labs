@@ -9,7 +9,44 @@ code Kernel
 	  (*threadPtr).Init("UserProgram")
 	  (*threadPtr).Fork(StartUserProcess, 0)
 	endFunction
-	
+
+  function StartUserProcess (arg: int)
+	  var
+		pcb: ptr to ProcessControlBlock
+		openFilePtr: ptr to OpenFile
+		entryPoint: int
+		initUserStackTop: int
+		initSystemStackTop: int
+		junk: int
+
+	  pcb = processManager.GetANewProcess()
+
+	  pcb.myThread = currentThread
+
+	  currentThread.myProcess = pcb
+
+	  openFilePtr = fileManager.Open("TestProgram1")
+
+	  entryPoint = (*openFilePtr).LoadExecutable(&(pcb.addrSpace))
+
+	  fileManager.Close(openFilePtr)
+
+	  initUserStackTop = pcb.addrSpace.numberOfPages*PAGE_SIZE
+
+	  initSystemStackTop = (& currentThread.systemStack[SYSTEM_STACK_SIZE-1]) asInteger
+
+	  junk = SetInterruptsTo (DISABLED)
+
+	  pcb.addrSpace.SetToThisPageTable()
+
+	  currentThread.isUserThread = true
+
+	  print("Becoming User Thread")
+
+	  BecomeUserThread(initUserStackTop, entryPoint, initSystemStackTop)
+
+	endFunction
+
 -----------------------------  InitializeScheduler  ---------------------------------
 
   function InitializeScheduler ()

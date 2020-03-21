@@ -5,45 +5,35 @@ code Kernel
   function InitFirstProcess ()
 	  var
 		threadPtr: ptr to Thread
-	  threadPtr = threadManager.GetANewThread()
-	  (*threadPtr).Init("UserProgram")
-	  (*threadPtr).Fork(StartUserProcess, 0)
+	  threadPtr = threadManager.GetANewThread ()
+	  (*threadPtr).Init ("UserProgram")
+	  (*threadPtr).Fork (StartUserProcess, 0)
 	endFunction
 
   function StartUserProcess (arg: int)
 	  var
-		pcb: ptr to ProcessControlBlock
-		openFilePtr: ptr to OpenFile
-		entryPoint: int
+		pcbPtr: ptr to ProcessControlBlock
+		exePtr: ptr to OpenFile
+		initUserPC: int
 		initUserStackTop: int
 		initSystemStackTop: int
-		junk: int
+		oldStatus: int
 
-	  pcb = processManager.GetANewProcess()
+	  pcbPtr = processManager.GetANewProcess ()
+	  pcbPtr.myThread = currentThread
+	  currentThread.myProcess = pcbPtr
 
-	  pcb.myThread = currentThread
+	  exePtr = fileManager.Open ("TestProgram1")
+	  initUserPC = (*exePtr).LoadExecutable (&(pcbPtr.addrSpace))
+	  fileManager.Close (exePtr)
 
-	  currentThread.myProcess = pcb
+	  initUserStackTop = (pcbPtr.addrSpace.numberOfPages) * PAGE_SIZE
+	  initSystemStackTop = & currentThread.systemStack[SYSTEM_STACK_SIZE-1]
 
-	  openFilePtr = fileManager.Open("TestProgram1")
-
-	  entryPoint = (*openFilePtr).LoadExecutable(&(pcb.addrSpace))
-
-	  fileManager.Close(openFilePtr)
-
-	  initUserStackTop = pcb.addrSpace.numberOfPages*PAGE_SIZE
-
-	  initSystemStackTop = (& currentThread.systemStack[SYSTEM_STACK_SIZE-1]) asInteger
-
-	  junk = SetInterruptsTo (DISABLED)
-
-	  pcb.addrSpace.SetToThisPageTable()
-
+	  oldStatus = SetInterruptsTo (DISABLED)
+	  pcbPtr.addrSpace.SetToThisPageTable ()
 	  currentThread.isUserThread = true
-
-	  print("Becoming User Thread")
-
-	  BecomeUserThread(initUserStackTop, entryPoint, initSystemStackTop)
+	  BecomeUserThread (initUserStackTop, initUserPC, initSystemStackTop)
 
 	endFunction
 
@@ -1756,17 +1746,48 @@ code Kernel
       var
 		ret: int
 		strBuffer: array [MAX_STRING_SIZE] of char
+		newAddrSpace: AddrSpace = new AddrSpace
+		exePtr: ptr to OpenFile
+		initUserPC: int
+		initUserStackTop: int
+		initSystemStackTop: int
+		oldStatus: int
 
-	  print ("function Handle_Sys_Exec is invoked")
+	  oldStatus = SetInterruptsTo (DISABLED)
+
+      print ("function Handle_Sys_Exec is invoked")
       nl()
 	  ret = (*currentThread).myProcess.addrSpace.GetStringFromVirtual(&strBuffer, filename asInteger, MAX_STRING_SIZE)
-	  if ret < 0
+	  if temp < 0
 	    FatalError ("Encounter an error when calling GetStringFromVirtual")
+		return -1
 	  endIf
-	  print("filename: ")
+      print("filename: ")
 	  print(&strBuffer)
 	  nl()
-      return 3000
+
+	  newAddrSpace.Init()
+
+	  exeFilePtr = fileManager.Open(&strBuffer)
+	  if exeFilePtr == null
+		return -1
+	  endIf
+
+	  initUserPC = exePtr.LoadExecutable(&newAddrSpace)
+	  if initUserPC < 0
+		return -1
+	  endIf
+
+	  frameManager.ReturnAllFrames(&((*currentThread).myProcess.addrSpace))
+	  currentThread.myProcess.addrSpace = newAddrSpace
+	  fileManager.Close(exePtr)
+	  (*currentThread).isUserThread = true
+
+	  initUserStackTop = (newAddrSpace.numberOfPages) * PAGE_SIZE
+	  initSystemStackTop = & currentThread.systemStack[SYSTEM_STACK_SIZE-1]
+	  newAddrSpace.SetToThisPageTable()
+	  BecomeUserThread(initUserStackTop, entryPoint, initSystemStackTop)
+	  return 3000
     endFunction
 
 -----------------------------  Handle_Sys_Create  ---------------------------------

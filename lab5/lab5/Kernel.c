@@ -1664,81 +1664,180 @@ code Kernel
 -----------------------------  Handle_Sys_Exit  ---------------------------------
 
   function Handle_Sys_Exit (returnStatus: int)
-      -- NOT IMPLEMENTED
+      print ("function Handle_Sys_Exit is invoked")
+      nl ()
+	  print ("returnStatus: ")
+	  printInt (returnStatus)
+	  nl ()
     endFunction
 
 -----------------------------  Handle_Sys_Shutdown  ---------------------------------
 
   function Handle_Sys_Shutdown ()
-      -- NOT IMPLEMENTED
+      print ("function Handle_Sys_Shutdown is invoked")
+      nl ()
+      FatalError ("Syscall 'Shutdown' was invoked by a user thread")
     endFunction
 
 -----------------------------  Handle_Sys_Yield  ---------------------------------
 
   function Handle_Sys_Yield ()
-      -- NOT IMPLEMENTED
+      print ("function Handle_Sys_Yield is invoked")
+      nl ()
     endFunction
 
 -----------------------------  Handle_Sys_Fork  ---------------------------------
 
   function Handle_Sys_Fork () returns int
-      -- NOT IMPLEMENTED
-      return 0
+      print ("function Handle_Sys_Fork is invoked")
+      nl ()
+      return 1000
     endFunction
 
 -----------------------------  Handle_Sys_Join  ---------------------------------
 
   function Handle_Sys_Join (processID: int) returns int
-      -- NOT IMPLEMENTED
-      return 0
+      print ("function Handle_Sys_Join is invoked")
+      nl ()
+	  print ("processID: ")
+	  printInt (processID)
+	  nl ()
+      return 2000
     endFunction
 
 -----------------------------  Handle_Sys_Exec  ---------------------------------
 
   function Handle_Sys_Exec (filename: ptr to array of char) returns int
-      -- NOT IMPLEMENTED
-      return 0
+      var
+		ret: int
+		strBuffer: array [MAX_STRING_SIZE] of char
+
+	  print ("function Handle_Sys_Exec is invoked")
+      nl()
+	  ret = (*currentThread).myProcess.addrSpace.GetStringFromVirtual(&strBuffer, filename asInteger, MAX_STRING_SIZE)
+	  if ret < 0
+	    FatalError ("Encounter an error when calling GetStringFromVirtual")
+	  endIf
+	  print("filename: ")
+	  print(&strBuffer)
+	  nl()
+      return 3000
     endFunction
 
 -----------------------------  Handle_Sys_Create  ---------------------------------
 
   function Handle_Sys_Create (filename: ptr to array of char) returns int
-      -- NOT IMPLEMENTED
-      return 0
+      var
+		ret: int
+		strBuffer: array [MAX_STRING_SIZE] of char
+
+	  print ("function Handle_Sys_Create is invoked")
+      nl()
+	  ret = (*currentThread).myProcess.addrSpace.GetStringFromVirtual(&strBuffer, filename asInteger, MAX_STRING_SIZE)
+	  if ret < 0
+	    FatalError ("Encounter an error when calling GetStringFromVirtual")
+	  endIf
+	  print("filename: ")
+	  print(&strBuffer)
+	  nl()
+      return 4000
     endFunction
 
 -----------------------------  Handle_Sys_Open  ---------------------------------
 
   function Handle_Sys_Open (filename: ptr to array of char) returns int
-      -- NOT IMPLEMENTED
-      return 0
+      var
+		ret: int
+		strBuffer: array [MAX_STRING_SIZE] of char
+
+	  print ("function Handle_Sys_Open is invoked")
+      nl()
+	  ret = (*currentThread).myProcess.addrSpace.GetStringFromVirtual(&strBuffer, filename asInteger, MAX_STRING_SIZE)
+	  if ret < 0
+	    FatalError ("Encounter an error when calling GetStringFromVirtual")
+	  endIf
+	  print("filename: ")
+	  print(&strBuffer)
+	  nl()
+      return 5000
     endFunction
 
 -----------------------------  Handle_Sys_Read  ---------------------------------
 
   function Handle_Sys_Read (fileDesc: int, buffer: ptr to char, sizeInBytes: int) returns int
-      -- NOT IMPLEMENTED
-      return 0
+      var
+		ret: int
+		strBuffer: array [MAX_STRING_SIZE] of char
+
+      print ("function Handle_Sys_Read is invoked")
+      nl ()
+	  print ("fileDesc: ")
+	  printInt (fileDesc)
+	  nl ()
+
+	  ret = (*currentThread).myProcess.addrSpace.GetStringFromVirtual(&strBuffer, filename asInteger, MAX_STRING_SIZE)
+	  if ret < 0
+	    FatalError ("Encounter an error when calling GetStringFromVirtual")
+	  endIf
+	  print("buffer: ")
+	  print(&strBuffer)
+	  nl()
+
+	  print ("sizeInBytes: ")
+	  printInt (sizeInBytes)
+	  nl ()
+      return 6000
     endFunction
 
 -----------------------------  Handle_Sys_Write  ---------------------------------
 
   function Handle_Sys_Write (fileDesc: int, buffer: ptr to char, sizeInBytes: int) returns int
-      -- NOT IMPLEMENTED
-      return 0
+      var
+		ret: int
+		strBuffer: array [MAX_STRING_SIZE] of char
+
+      print ("function Handle_Sys_Write is invoked")
+      nl ()
+	  print ("fileDesc: ")
+	  printInt (fileDesc)
+	  nl ()
+
+	  ret = (*currentThread).myProcess.addrSpace.GetStringFromVirtual(&strBuffer, filename asInteger, MAX_STRING_SIZE)
+	  if ret < 0
+	    FatalError ("Encounter an error when calling GetStringFromVirtual")
+	  endIf
+	  print("buffer: ")
+	  print(&strBuffer)
+	  nl()
+
+	  print ("sizeInBytes: ")
+	  printInt (sizeInBytes)
+	  nl ()
+      return 7000
     endFunction
 
 -----------------------------  Handle_Sys_Seek  ---------------------------------
 
   function Handle_Sys_Seek (fileDesc: int, newCurrentPos: int) returns int
-      -- NOT IMPLEMENTED
-      return 0
+      print ("function Handle_Sys_Seek is invoked")
+      nl ()
+	  print ("fileDesc: ")
+	  printInt (fileDesc)
+	  nl ()
+	  print ("newCurrentPos: ")
+	  printInt (newCurrentPos)
+	  nl ()
+      return 8000
     endFunction
 
 -----------------------------  Handle_Sys_Close  ---------------------------------
 
   function Handle_Sys_Close (fileDesc: int)
-      -- NOT IMPLEMENTED
+      print ("function Handle_Sys_Close is invoked")
+      nl ()
+	  print ("fileDesc: ")
+	  printInt (fileDesc)
+	  nl ()
     endFunction
 
 -----------------------------  DiskDriver  ---------------------------------

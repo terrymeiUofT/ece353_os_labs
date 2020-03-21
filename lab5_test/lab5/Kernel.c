@@ -1818,48 +1818,51 @@ code Kernel
 -----------------------------  Handle_Sys_Exec  ---------------------------------
 
   function Handle_Sys_Exec (filename: ptr to array of char) returns int
-      -- NOT IMPLEMENTED
-    var
-      newAddrSpace: AddrSpace = new AddrSpace
-      pOF: ptr to OpenFile
-      initPC: int
-      initUserStackTop: int
-      initSystemStackTop: int
-      oldIntStat: int
-      ret: int
-      strBuffer: array [MAX_STRING_SIZE] of char
+      var
+		ret: int
+		strBuffer: array [MAX_STRING_SIZE] of char
+		newAddrSpace: AddrSpace = new AddrSpace
+		exePtr: ptr to OpenFile
+		initUserPC: int
+		initUserStackTop: int
+		initSystemStackTop: int
+		oldStatus: int
 
-     -- Disable interrupts;
-    oldIntStat = SetInterruptsTo (DISABLED)
-    newAddrSpace.Init()
+      print ("function Handle_Sys_Exec is invoked")
+      nl ()
+	  ret = currentThread.myProcess.addrSpace.GetStringFromVirtual (&strBuffer, filename asInteger, MAX_STRING_SIZE)
+	  if ret < 0
+	    FatalError ("Encounter an error when calling GetStringFromVirtual")
+		return -1
+	  endIf
+      print ("filename: ")
+	  print (&strBuffer)
+	  nl ()
 
-    ret = (*currentThread).myProcess.addrSpace.GetStringFromVirtual(&strBuffer,filename asInteger, MAX_STRING_SIZE)
+	  newAddrSpace.Init ()
 
-    if (ret < 0)
-      return -1
-    endIf
-    pOF = fileManager.Open(&strBuffer)
+	  exePtr = fileManager.Open (&strBuffer)
+	  if exePtr == null
+		return -1
+	  endIf
 
-    if (!pOF)
-      return -1
-    endIf
+	  initUserPC = exePtr.LoadExecutable (&newAddrSpace)
+	  if initUserPC < 0
+		return -1
+	  endIf
+      fileManager.Close (exePtr)
 
-    initPC = (*pOF).LoadExecutable(&newAddrSpace)
-    if (initPC<0)
-      return -1
-    endIf
+	  frameManager.ReturnAllFrames (&(currentThread.myProcess.addrSpace))
+	  currentThread.myProcess.addrSpace = newAddrSpace
 
-    currentThread.myProcess.addrSpace = newAddrSpace
-    frameManager.ReturnAllFrames(&((*currentThread).myProcess.addrSpace))
-    fileManager.Close(pOF)
-    initUserStackTop = (newAddrSpace.numberOfPages)*PAGE_SIZE
-    initSystemStackTop = (&(currentThread.systemStack[SYSTEM_STACK_SIZE-1])) asInteger
+	  initUserStackTop = (newAddrSpace.numberOfPages) * PAGE_SIZE
+	  initSystemStackTop = (& currentThread.systemStack[SYSTEM_STACK_SIZE-1]) asInteger
 
-    currentThread.isUserThread = true
-
-    BecomeUserThread (initUserStackTop, initPC, initSystemStackTop)
-
-      return 3000
+      oldStatus = SetInterruptsTo (DISABLED)
+	  newAddrSpace.SetToThisPageTable ()
+	  currentThread.isUserThread = true
+	  BecomeUserThread (initUserStackTop, initUserPC, initSystemStackTop)
+	  return 3000
     endFunction
 
 -----------------------------  Handle_Sys_Create  ---------------------------------

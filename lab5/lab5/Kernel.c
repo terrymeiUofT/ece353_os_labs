@@ -6,8 +6,8 @@ code Kernel
 	  var
 		threadPtr: ptr to Thread
 	  threadPtr = threadManager.GetANewThread ()
-	  (*threadPtr).Init ("UserProgram")
-	  (*threadPtr).Fork (StartUserProcess, 0)
+	  threadPtr.Init ("UserProgram")
+	  threadPtr.Fork (StartUserProcess, 0)
 	endFunction
 
   function StartUserProcess (arg: int)

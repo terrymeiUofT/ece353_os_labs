@@ -2,41 +2,6 @@ code Kernel
 
   -- <Tianchang Mei>
 
-  function InitFirstProcess ()
-	  var
-		threadPtr: ptr to Thread
-	  threadPtr = threadManager.GetANewThread ()
-	  threadPtr.Init ("UserProgram")
-	  threadPtr.Fork (StartUserProcess, 0)
-	endFunction
-
-  function StartUserProcess (arg: int)
-	  var
-		pcbPtr: ptr to ProcessControlBlock
-		exePtr: ptr to OpenFile
-		initUserPC: int
-		initUserStackTop: int
-		initSystemStackTop: int
-		oldStatus: int
-
-	  pcbPtr = processManager.GetANewProcess ()
-	  pcbPtr.myThread = currentThread
-	  currentThread.myProcess = pcbPtr
-
-	  exePtr = fileManager.Open ("TestProgram1")
-	  initUserPC = (*exePtr).LoadExecutable (&(pcbPtr.addrSpace))
-	  fileManager.Close (exePtr)
-
-	  initUserStackTop = (pcbPtr.addrSpace.numberOfPages) * PAGE_SIZE
-	  initSystemStackTop = (& currentThread.systemStack[SYSTEM_STACK_SIZE-1]) asInteger
-
-	  oldStatus = SetInterruptsTo (DISABLED)
-	  pcbPtr.addrSpace.SetToThisPageTable ()
-	  currentThread.isUserThread = true
-	  BecomeUserThread (initUserStackTop, initUserPC, initSystemStackTop)
-
-	endFunction
-
 -----------------------------  InitializeScheduler  ---------------------------------
 
   function InitializeScheduler ()
@@ -235,6 +200,42 @@ code Kernel
       endIf
       return oldStat
     endFunction
+
+-----------------------------  InitFirstProcess  ---------------------------------
+
+  function InitFirstProcess ()
+	  var
+		threadPtr: ptr to Thread
+	  threadPtr = threadManager.GetANewThread ()
+	  threadPtr.Init ("UserProgram")
+	  threadPtr.Fork (StartUserProcess, 0)
+	endFunction
+
+  function StartUserProcess (arg: int)
+	  var
+		pcbPtr: ptr to ProcessControlBlock
+		exePtr: ptr to OpenFile
+		initUserPC: int
+		initUserStackTop: int
+		initSystemStackTop: int
+		oldStatus: int
+
+	  pcbPtr = processManager.GetANewProcess ()
+	  pcbPtr.myThread = currentThread
+	  currentThread.myProcess = pcbPtr
+
+	  exePtr = fileManager.Open ("MyProgram")
+	  initUserPC = exePtr.LoadExecutable (&(pcbPtr.addrSpace))
+	  fileManager.Close (exePtr)
+
+	  initUserStackTop = (pcbPtr.addrSpace.numberOfPages) * PAGE_SIZE
+	  initSystemStackTop = (& currentThread.systemStack[SYSTEM_STACK_SIZE-1]) asInteger
+
+	  oldStatus = SetInterruptsTo (DISABLED)
+	  pcbPtr.addrSpace.SetToThisPageTable ()
+	  currentThread.isUserThread = true
+	  BecomeUserThread (initUserStackTop, initUserPC, initSystemStackTop)
+	endFunction
 
 -----------------------------  Semaphore  ---------------------------------
 

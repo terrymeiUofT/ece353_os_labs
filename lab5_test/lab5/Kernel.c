@@ -1868,38 +1868,38 @@ code Kernel
 -----------------------------  Handle_Sys_Create  ---------------------------------
 
   function Handle_Sys_Create (filename: ptr to array of char) returns int
-      -- NOT IMPLEMENTED
       var
-        strBuffer: array [MAX_STRING_SIZE] of char
-        ret: int
-      print("Handle_Sys_Create invoked! \n")
-      print("virt addr of filename = ")
-      printHex(filename asInteger)
-      nl()
-      print("filename = ")
-      ret = currentThread.myProcess.addrSpace.GetStringFromVirtual (&strBuffer,filename asInteger, MAX_STRING_SIZE)
-      print(&strBuffer)
-      nl()
+		ret: int
+		strBuffer: array [MAX_STRING_SIZE] of char
 
+	  print ("function Handle_Sys_Create is invoked")
+      nl()
+	  ret = currentThread.myProcess.addrSpace.GetStringFromVirtual(&strBuffer, filename asInteger, MAX_STRING_SIZE)
+	  if ret < 0
+	    FatalError ("Encounter an error when calling GetStringFromVirtual")
+	  endIf
+	  print("filename: ")
+	  print(&strBuffer)
+	  nl()
       return 4000
     endFunction
 
 -----------------------------  Handle_Sys_Open  ---------------------------------
 
   function Handle_Sys_Open (filename: ptr to array of char) returns int
-      -- NOT IMPLEMENTED
-       var
-        strBuffer: array [MAX_STRING_SIZE] of char
-        ret: int
-      print("Handle_Sys_Open invoked! \n")
-      print("virt addr of filename = ")
-      printHex(filename asInteger)
-      nl()
-      print("filename = ")
-      ret = currentThread.myProcess.addrSpace.GetStringFromVirtual (&strBuffer,filename asInteger, MAX_STRING_SIZE)
-      print(&strBuffer)
-      nl()
+      var
+		ret: int
+		strBuffer: array [MAX_STRING_SIZE] of char
 
+	  print ("function Handle_Sys_Open is invoked")
+      nl()
+	  ret = (*currentThread).myProcess.addrSpace.GetStringFromVirtual(&strBuffer, filename asInteger, MAX_STRING_SIZE)
+	  if ret < 0
+	    FatalError ("Encounter an error when calling GetStringFromVirtual")
+	  endIf
+	  print("filename: ")
+	  print(&strBuffer)
+	  nl()
       return 5000
     endFunction
 

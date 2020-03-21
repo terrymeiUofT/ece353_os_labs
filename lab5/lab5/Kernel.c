@@ -207,8 +207,8 @@ code Kernel
 	  var
 		threadPtr: ptr to Thread
 	  threadPtr = threadManager.GetANewThread ()
-	  (*threadPtr).Init ("UserProgram")
-	  (*threadPtr).Fork (StartUserProcess, 0)
+	  threadPtr.Init ("UserProgram")
+	  threadPtr.Fork (StartUserProcess, 0)
 	endFunction
 
   function StartUserProcess (arg: int)
@@ -225,7 +225,7 @@ code Kernel
 	  currentThread.myProcess = pcbPtr
 
 	  exePtr = fileManager.Open ("MyProgram")
-	  initUserPC = (*exePtr).LoadExecutable (&(pcbPtr.addrSpace))
+	  initUserPC = exePtr.LoadExecutable (&(pcbPtr.addrSpace))
 	  fileManager.Close (exePtr)
 
 	  initUserStackTop = (pcbPtr.addrSpace.numberOfPages) * PAGE_SIZE

@@ -28,7 +28,7 @@ code Kernel
 	  fileManager.Close (exePtr)
 
 	  initUserStackTop = (pcbPtr.addrSpace.numberOfPages) * PAGE_SIZE
-	  initSystemStackTop = & currentThread.systemStack[SYSTEM_STACK_SIZE-1]
+	  initSystemStackTop = (& currentThread.systemStack[SYSTEM_STACK_SIZE-1]) asInteger
 
 	  oldStatus = SetInterruptsTo (DISABLED)
 	  pcbPtr.addrSpace.SetToThisPageTable ()
@@ -1781,7 +1781,7 @@ code Kernel
 	  currentThread.myProcess.addrSpace = newAddrSpace
 
 	  initUserStackTop = (newAddrSpace.numberOfPages) * PAGE_SIZE
-	  initSystemStackTop = & currentThread.systemStack[SYSTEM_STACK_SIZE-1]
+	  initSystemStackTop = (& currentThread.systemStack[SYSTEM_STACK_SIZE-1]) asInteger
 
       oldStatus = SetInterruptsTo (DISABLED)
 	  newAddrSpace.SetToThisPageTable ()

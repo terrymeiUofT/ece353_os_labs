@@ -1505,7 +1505,7 @@ code Kernel
       -- FatalError ("DISK INTERRUPTS NOT EXPECTED IN PROJECT 4")
 
       currentInterruptStatus = DISABLED
-      -- print ("DiskInterruptHandler invoked!\n")
+      print ("DiskInterruptHandler invoked!\n")
       if diskDriver.semToSignalOnCompletion
         diskDriver.semToSignalOnCompletion.Up()
       endIf

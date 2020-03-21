@@ -2,6 +2,14 @@ code Kernel
 
   -- <Tianchang Mei>
 
+  function InitFirstProcess ()
+	  var
+		threadPtr: ptr to Thread
+	  threadPtr = threadManager.GetANewThread()
+	  (*threadPtr).Init("UserProgram")
+	  (*threadPtr).Fork(StartUserProcess, 0)
+	endFunction
+	
 -----------------------------  InitializeScheduler  ---------------------------------
 
   function InitializeScheduler ()
@@ -1775,7 +1783,7 @@ code Kernel
 	  printInt (fileDesc)
 	  nl ()
 
-	  ret = (*currentThread).myProcess.addrSpace.GetStringFromVirtual(&strBuffer, filename asInteger, MAX_STRING_SIZE)
+	  ret = (*currentThread).myProcess.addrSpace.GetStringFromVirtual(&strBuffer, buffer asInteger, MAX_STRING_SIZE)
 	  if ret < 0
 	    FatalError ("Encounter an error when calling GetStringFromVirtual")
 	  endIf
@@ -1802,7 +1810,7 @@ code Kernel
 	  printInt (fileDesc)
 	  nl ()
 
-	  ret = (*currentThread).myProcess.addrSpace.GetStringFromVirtual(&strBuffer, filename asInteger, MAX_STRING_SIZE)
+	  ret = (*currentThread).myProcess.addrSpace.GetStringFromVirtual(&strBuffer, buffer asInteger, MAX_STRING_SIZE)
 	  if ret < 0
 	    FatalError ("Encounter an error when calling GetStringFromVirtual")
 	  endIf

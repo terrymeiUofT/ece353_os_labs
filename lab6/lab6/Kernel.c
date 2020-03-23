@@ -208,7 +208,7 @@ code Kernel
         threadPtr: ptr to Thread
       threadPtr = threadManager.GetANewThread ()
       threadPtr.Init ("UserProgram")
-      threadPtr.Fork (StartUserProcess, 0)
+      threadPtr.Fork (StartUserProcess, "TestProgram3" asInteger)
     endFunction
 
   function StartUserProcess ()
@@ -1702,11 +1702,12 @@ code Kernel
 -----------------------------  Handle_Sys_Exit  ---------------------------------
 
   function Handle_Sys_Exit (returnStatus: int)
-      print ("function Handle_Sys_Exit is invoked")
-      nl ()
-	  print ("returnStatus: ")
-	  printInt (returnStatus)
-	  nl ()
+      -- print ("function Handle_Sys_Exit is invoked")
+      -- nl ()
+	  -- print ("returnStatus: ")
+	  -- printInt (returnStatus)
+	  -- nl ()
+	  ProcessFinish (returnStatus)
     endFunction
 
 -----------------------------  Handle_Sys_Shutdown  ---------------------------------
@@ -1720,27 +1721,95 @@ code Kernel
 -----------------------------  Handle_Sys_Yield  ---------------------------------
 
   function Handle_Sys_Yield ()
-      print ("function Handle_Sys_Yield is invoked")
-      nl ()
+      -- print ("function Handle_Sys_Yield is invoked")
+      -- nl ()
+      currentThread.Yield ()
     endFunction
 
 -----------------------------  Handle_Sys_Fork  ---------------------------------
 
   function Handle_Sys_Fork () returns int
-      print ("function Handle_Sys_Fork is invoked")
-      nl ()
-      return 1000
+      var
+        newPCB: ptr to ProcessControlBlock
+        newThrd: ptr to Thread
+        numPages: int
+        ret: int
+        oldUserPC: int
+
+      -- print ("function Handle_Sys_Fork is invoked")
+      -- nl ()
+
+      -- initializing and linking
+      newPCB = processManager.GetANewProcess ()
+      newThrd = threadManager.GetANewThread ()
+      newPCB.myThread = newThrd
+      newPCB.parentsPid = currentThread.myProcess.pid
+      newThrd.status = READY
+      newThrd.myProcess = newPCB
+
+      -- grab contents in user registers and enable the interrupts
+      SaveUserRegs (&(newThrd.userRegs[0]))
+      ret = SetInterruptsTo (ENABLED)
+
+      -- initialize stackTop pointer
+      newThrd.stackTop = & (newThrd.systemStack[SYSTEM_STACK_SIZE-1])
+
+      -- make a copy of the parents virtual address space
+      -- and run thru each and copy the page
+      numPages = currentThread.myProcess.addrSpace.numberOfPages
+      frameManager.GetNewFrames (&(newPCB.addrSpace), numPages)
+      for (i=0; i<numPages; i++)
+        MemoryCopy (newPCB.addrSpace.ExtractFrameAddr(i), currentThread.myProcess.addrSpace.ExtractFrameAddr(i), PAGE_SIZE)
+		-- set the writable bit
+		if currentThread.myProcess.addrSpace.IsWritable(i)
+		    newPCB.addrSpace.SetWritable (i)
+		else
+			newPCB.addrSpace.ClearWritable (i)
+		endIf
+	  endFor
+
+	  oldUserPC = GetOldUserPCFromSystemStack ()
+	  newThread.Fork (ResumeChildAfterFork, oldUserPC)
+      return newPCB.pid
+    endFunction
+
+  function ResumeChildAfterFork (oldUserPC: int)
+      var
+		initUserStackTop: int
+		initSystemStackTop: int
+		oldStatus: int
+
+      oldStatus = SetInterruptsTo (DISABLED)
+      currentThread.myProcess.addrSpace.SetToThisPageTable ()
+      RestoreUserRegs (&(currentThread.userRegs[0]))
+      currentThread.isUserThread = true
+
+      initUserStackTop = currentThread.userRegs[14]
+      initSystemStackTop = (&(currentThread.systemStack[SYSTEM_STACK_SIZE-1])) asInteger
+
+      BecomeUserThread (initUserStackTop, oldUserPC, initSystemStackTop)
     endFunction
 
 -----------------------------  Handle_Sys_Join  ---------------------------------
 
   function Handle_Sys_Join (processID: int) returns int
-      print ("function Handle_Sys_Join is invoked")
-      nl ()
-	  print ("processID: ")
-	  printInt (processID)
-	  nl ()
-      return 2000
+      var
+        i: int
+
+      -- print ("function Handle_Sys_Join is invoked")
+      -- nl ()
+	  -- print ("processID: ")
+	  -- printInt (processID)
+	  -- nl ()
+
+	  for (i=0;i<MAX_NUMBER_OF_PROCESSES-1;i++)
+	    -- passed in pid and childs parentspid needs to match
+	    if (processID == processManager.processTable[i].pid) && (processManager.processTable[i].parentsPid == currentThread.myProcess.pid)
+	      return processManager.WaitForZombie (&(processManager.processTable[i]))
+	    else
+	      return -1
+	    endIf
+	  endFor
     endFunction
 
 -----------------------------  Handle_Sys_Exec  ---------------------------------
@@ -1756,16 +1825,16 @@ code Kernel
 		initSystemStackTop: int
 		oldStatus: int
 
-      print ("function Handle_Sys_Exec is invoked")
-      nl ()
+      -- print ("function Handle_Sys_Exec is invoked")
+      -- nl ()
 	  ret = currentThread.myProcess.addrSpace.GetStringFromVirtual (&strBuffer, filename asInteger, MAX_STRING_SIZE)
 	  if ret < 0
 	    FatalError ("Encounter an error when calling GetStringFromVirtual")
 		return -1
 	  endIf
-      print ("filename: ")
-	  print (&strBuffer)
-	  nl ()
+      -- print ("filename: ")
+	  -- print (&strBuffer)
+	  -- nl ()
 
 	  newAddrSpace.Init ()
 

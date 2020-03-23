@@ -726,38 +726,21 @@ code Kernel
         -- This method is called once at kernel startup time to initialize
         -- the one and only "ThreadManager" object.
         --
-          -- print ("Initializing Thread Manager...\n")
-          -- NOT IMPLEMENTED
+          var i: int
+          print ("Initializing Thread Manager...\n")
+          threadTable = new array of Thread {MAX_NUMBER_OF_PROCESSES of new Thread}
+          freeList = new List [Thread]
+          threadManagerLock = new Mutex
+          aThreadBecameFree = new Condition
 
-        var i: int
-
-        threadTable = new array of Thread {MAX_NUMBER_OF_PROCESSES of new Thread}
-        freeList = new List[Thread]
-        threadManagerLock = new Mutex
-        aThreadBecameFree = new Condition
-
-      --name_ptr: ptr to array[1] of char
-      --temp_name: array[1] of char
-
-
-
-
-        threadManagerLock.Init()
-        aThreadBecameFree.Init()
-
-        --temp_name = new array of char{1 of 'X'}
-        --name_ptr = &temp_name
-
-        for(i=0;i<MAX_NUMBER_OF_PROCESSES;i=i+1)
-
-          threadTable[i].Init("Xxx")      -- need a pointer to char array, TODO: take care later
-          threadTable[i].status = UNUSED
+          for (i=0; i<MAX_NUMBER_OF_PROCESSES; i=i+1)
+            threadTable[i].Init("testThread")
+            threadTable[i].status = UNUSED
+            freeList.AddToEnd(&(threadTable[i]))
           endFor
 
-        for(i=0;i<MAX_NUMBER_OF_PROCESSES;i=i+1)
-          freeList.AddToEnd(&threadTable[i])
-          endFor
-
+          threadManagerLock.Init()
+          aThreadBecameFree.Init()
 
         endMethod
 
@@ -793,21 +776,15 @@ code Kernel
         -- and change its status to just_created
           -- NOT IMPLEMENTED
           -- return null
-          var
-            newThreadPtr: ptr to Thread
-
+        var newThread: ptr to Thread
           threadManagerLock.Lock()
-
-          while freeList.IsEmpty() == true
+          while freeList.IsEmpty()
             aThreadBecameFree.Wait(&threadManagerLock)
-            endWhile
-
-          newThreadPtr = freeList.Remove()
-          (*newThreadPtr).status = JUST_CREATED
-          -- (*(freeList.Remove())).status = JUST_CREATED
+          endWhile
+          newThread = freeList.Remove()
+          (*newThread).status = JUST_CREATED
           threadManagerLock.Unlock()
-
-          return newThreadPtr
+          return newThread
         endMethod
 
       ----------  ThreadManager . FreeThread  ----------
@@ -817,13 +794,11 @@ code Kernel
         -- This method is passed a ptr to a Thread;  It moves it
         -- to the FREE list.
         --
-          -- NOT IMPLEMENTED
-        threadManagerLock.Lock()
-        (*th).status = UNUSED
-        freeList.AddToEnd(th)
-        aThreadBecameFree.Signal(&threadManagerLock)
-        threadManagerLock.Unlock()
-
+          threadManagerLock.Lock()
+          (*th).status = UNUSED
+          freeList.AddToEnd(th)
+          aThreadBecameFree.Signal(&threadManagerLock)
+          threadManagerLock.Unlock()
         endMethod
 
     endBehavior

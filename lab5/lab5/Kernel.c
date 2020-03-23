@@ -1086,64 +1086,34 @@ code Kernel
       ----------  FrameManager . GetNewFrames  ----------
 
       method GetNewFrames (aPageTable: ptr to AddrSpace, numFramesNeeded: int)
-          -- NOT IMPLEMENTED
-          var
-          freeFrameIdx: int
-          i: int
-          freeFrameAddr: int
-          -- Acquire the frame manager lock
+        var i, f, frameAddr: int
           frameManagerLock.Lock()
-
-          -- Wait on newFramesAvailable until there are enough free frames to satisfy the request
-          while (numberFreeFrames < numFramesNeeded)
+          while (framesInUse.NumberOfClearBits() <= numFramesNeeded)
             newFramesAvailable.Wait(&frameManagerLock)
-            endWhile
-
-          -- Do a loop for each of the frames
-          for i = 0 to numFramesNeeded - 1
-          -- determine which frame is free (find and set a bit in the framesInUse BitMap)
-            freeFrameIdx = framesInUse.FindZeroAndSet ()
-
-          -- (b) figure out the address of the free frame;
-            freeFrameAddr = PHYSICAL_ADDRESS_OF_FIRST_PAGE_FRAME + (freeFrameIdx * PAGE_SIZE)
-
-          -- (c) execute the following:
-            aPageTable.SetFrameAddr (i, freeFrameAddr)
-            endFor
-          -- to store the address of the frame which has been allocated
-          -- (d) adjust the number of free frames;
+          endWhile
+          for (i=0; i<numFramesNeeded; i=i+1)
+            f = framesInUse.FindZeroAndSet()
+            frameAddr = PHYSICAL_ADDRESS_OF_FIRST_PAGE_FRAME + (f * PAGE_SIZE)
+            aPageTable.SetFrameAddr(i, frameAddr)
+          endFor
           numberFreeFrames = numberFreeFrames - numFramesNeeded
-          -- (e) set aPageTable.numberOfPages to the number of frames allocated; (f) unlock the frame manager.
           aPageTable.numberOfPages = numFramesNeeded
           frameManagerLock.Unlock()
-
-
         endMethod
 
       ----------  FrameManager . ReturnAllFrames  ----------
 
       method ReturnAllFrames (aPageTable: ptr to AddrSpace)
-          -- NOT IMPLEMENTED
-          var
-          returnFrameIdx: int
-          returnFrameAddr: int
-          numFramesReturned: int
-          i: int
-
+        var i, bitNumber, frameAddr: int
           frameManagerLock.Lock()
-          numFramesReturned = (*aPageTable).numberOfPages
-          for i = 0 to numFramesReturned-1
-            returnFrameAddr = aPageTable.ExtractFrameAddr(i)
-            returnFrameIdx = (returnFrameAddr - PHYSICAL_ADDRESS_OF_FIRST_PAGE_FRAME) / PAGE_SIZE -- opposite to allocate
-            framesInUse.ClearBit(returnFrameIdx)
-            endFor
-
-          -- notify waiting threads
+          for (i=0; i<aPageTable.numberOfPages; i=i+1)
+            frameAddr = aPageTable.ExtractFrameAddr(i)
+            bitNumber = (frameAddr - PHYSICAL_ADDRESS_OF_FIRST_PAGE_FRAME)/(PAGE_SIZE)
+            framesInUse.ClearBit(bitNumber)
+          endFor
+          numberFreeFrames = numberFreeFrames + aPageTable.numberOfPages
           newFramesAvailable.Broadcast(&frameManagerLock)
-          numberFreeFrames = numberFreeFrames + numFramesReturned
           frameManagerLock.Unlock()
-
-
         endMethod
 
     endBehavior

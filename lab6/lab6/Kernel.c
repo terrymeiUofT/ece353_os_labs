@@ -986,65 +986,56 @@ code Kernel
 
       ----------  ProcessManager . TurnIntoZombie  ----------
       method TurnIntoZombie(p: ptr to ProcessControlBlock)
+		var
+			i: int
+			parentPcb: ptr to ProcessControlBlock
+		processManager.processManagerLock.Lock()
 
-      var
-        i: int
-        pParent: ptr to ProcessControlBlock
+		-- take care of children of p
+		for i = 0 to MAX_NUMBER_OF_PROCESSES-1 by 1
+			if processManager.processTable[i].pid == p.parentsPid -- locate parent while dealing with children
+				parentPcb = &(processManager.processTable[i])
+			endIf
+			if processManager.processTable[i].status == ZOMBIE && processManager.processTable[i].parentsPid == p.pid
+				processManager.processTable[i].status = FREE
+				processManager.freeList.AddToEnd(&processManager.processTable[i])
+				processManager.aProcessBecameFree.Signal(&(processManager.processManagerLock))
+			endIf
+		endFor
 
-      pParent = null
-      processManager.processManagerLock.Lock()
-      for(i=0;i<MAX_NUMBER_OF_PROCESSES;i=i+1)
-        -- find children whose zombie
-        if p.pid == processManager.processTable[i].parentsPid && processManager.processTable[i].status == ZOMBIE
-          --
-          processManager.processTable[i].status = FREE
-          processManager.freeList.AddToEnd(&processManager.processTable[i])
-          -- signal the processes thats waiting for PCBs
-          processManager.aProcessBecameFree.Signal(&(processManager.processManagerLock))
+		-- handle parent of p, turn into zombie or free self
+		if parentPcb != null && parentPcb.status == ACTIVE
+			p.status = ZOMBIE
+			processManager.aProcessDied.Broadcast(&(processManager.processManagerLock))
+		else
+			p.status = FREE
+			processManager.freeList.AddToEnd(p)
+			processManager.aProcessBecameFree.Signal(&(processManager.processManagerLock))
+		endIf
 
-        endIf
-
-        -- find parent
-        if p.parentsPid == processManager.processTable[i].pid
-          pParent = &(processManager.processTable[i])
-        endIf
-      endFor
-
-      -- if parent exist(not terminated yet) and active
-      if pParent != null && pParent.status == ACTIVE
-        p.status = ZOMBIE
-        -- parent may be waiting p to exit, broadcast
-        processManager.aProcessDied.Broadcast(&(processManager.processManagerLock))
-      else  -- not active nor exist
-        p.status = FREE
-        processManager.freeList.AddToEnd(p)
-        processManager.aProcessDied.Signal(&(processManager.processManagerLock))
-      endIf
-
-      processManager.processManagerLock.Unlock()
+		processManager.processManagerLock.Unlock()
 
       endMethod
 
       ----------  ProcessManager . WaitForZombie  ----------
 
       method WaitForZombie (proc: ptr to ProcessControlBlock) returns int
-        var
-          pExitStatus: int
+		var
+			procExitStatus: int
 
-        processManager.processManagerLock.Lock()
-        while proc.status != ZOMBIE
-          processManager.aProcessDied.Wait(&(processManager.processManagerLock))
-        endWhile
+		processManager.processManagerLock.Lock()
 
-        pExitStatus = proc.exitStatus
+		while proc.status != ZOMBIE
+			processManager.aProcessDied.Wait(&(processManager.processManagerLock))
+		endWhile
 
-        proc.status = FREE
-        processManager.freeList.AddToEnd(proc)
-        processManager.aProcessBecameFree.Signal(&(processManager.processManagerLock))
+		procExitStatus = proc.exitStatus
+		proc.status = FREE
+		processManager.freeList.AddToEnd(proc)
+		processManager.aProcessBecameFree.Signal(&(processManager.processManagerLock))
 
-        processManager.processManagerLock.Unlock()
-
-        return pExitStatus
+		processManager.processManagerLock.Unlock()
+		return procExitStatus
       endMethod
 
     endBehavior

@@ -986,57 +986,63 @@ code Kernel
 
       ----------  ProcessManager . TurnIntoZombie  ----------
       method TurnIntoZombie(p: ptr to ProcessControlBlock)
-		var
-			i: int
-			parentPcb: ptr to ProcessControlBlock
-		processManager.processManagerLock.Lock()
+		  var
+		    i: int
+			parentPCB: ptr to ProcessControlBlock
 
-		-- take care of children of p
-		for i = 0 to MAX_NUMBER_OF_PROCESSES-1 by 1
-			if processManager.processTable[i].pid == p.parentsPid -- locate parent while dealing with children
-				parentPcb = &(processManager.processTable[i])
-			endIf
-			if processManager.processTable[i].status == ZOMBIE && processManager.processTable[i].parentsPid == p.pid
-				processManager.processTable[i].status = FREE
-				processManager.freeList.AddToEnd(&processManager.processTable[i])
-				processManager.aProcessBecameFree.Signal(&(processManager.processManagerLock))
-			endIf
-		endFor
+		  processManager.processManagerLock.Lock()
 
-		-- handle parent of p, turn into zombie or free self
-		if parentPcb != null && parentPcb.status == ACTIVE
-			p.status = ZOMBIE
-			processManager.aProcessDied.Broadcast(&(processManager.processManagerLock))
-		else
-			p.status = FREE
-			processManager.freeList.AddToEnd(p)
-			processManager.aProcessBecameFree.Signal(&(processManager.processManagerLock))
-		endIf
+          -- identify zombies children of this process
+          -- if zombie: change to FREE and add it back to the PCB freelist
+		  for (i=0; i<MAX_NUMBER_OF_PROCESSES; i=i+1)
+		  	if (processManager.processTable[i].parentsPid == p.pid) && (processManager.processTable[i].status == ZOMBIE)
+			  processManager.processTable[i].status = FREE
+			  processManager.freeList.AddToEnd(&(processManager.processTable[i]))
+			  processManager.aProcessBecameFree.Signal(&(processManager.processManagerLock))
+		    endIf
+		  endFor
 
-		processManager.processManagerLock.Unlock()
+		  -- identify parent of p
+		  for (i=0; i<MAX_NUMBER_OF_PROCESSES; i=i+1)
+		    if p.parentsPid == processManager.processTable[i].pid
+			  parentPCB = &(processManager.processTable[i])
+		    endIf
+		  endFor
 
-      endMethod
+		  -- parent may have already terminated
+		  -- if ACTIVE: turn p into zombie
+		  if (parentPCB != null) && (parentPCB.status == ACTIVE)
+		    p.status = ZOMBIE
+		    processManager.aProcessDied.Broadcast(&(processManager.processManagerLock))
+	      elseIf (parentPCB == null) || (parentPCB.status == ZOMBIE)
+		    p.status = FREE
+		    processManager.freeList.AddToEnd(p)
+		    processManager.aProcessBecameFree.Signal(&(processManager.processManagerLock))
+	      endIf
+
+		  processManager.processManagerLock.Unlock()
+
+        endMethod
 
       ----------  ProcessManager . WaitForZombie  ----------
 
       method WaitForZombie (proc: ptr to ProcessControlBlock) returns int
-		var
-			procExitStatus: int
+		  var
+			retExitStatus: int
 
-		processManager.processManagerLock.Lock()
+		  processManager.processManagerLock.Lock()
 
-		while proc.status != ZOMBIE
+		  while (proc.status != ZOMBIE)
 			processManager.aProcessDied.Wait(&(processManager.processManagerLock))
-		endWhile
+		  endWhile
 
-		procExitStatus = proc.exitStatus
-		proc.status = FREE
-		processManager.freeList.AddToEnd(proc)
-		processManager.aProcessBecameFree.Signal(&(processManager.processManagerLock))
-
-		processManager.processManagerLock.Unlock()
-		return procExitStatus
-      endMethod
+		  retExitStatus = proc.exitStatus
+		  proc.status = FREE
+		  processManager.freeList.AddToEnd(proc)
+		  processManager.aProcessBecameFree.Signal(&(processManager.processManagerLock))
+		  processManager.processManagerLock.Unlock()
+		  return retExitStatus
+        endMethod
 
     endBehavior
 
@@ -1058,29 +1064,21 @@ code Kernel
     -- free the resources held by this process and will terminate the
     -- current thread.
     --
-    var
-      oldIntStat: int
+      var
+        oldStatus: int
 
-    -- save exit status
-    currentThread.myProcess.exitStatus = exitStatus
-    -- disable interrupts
-    oldIntStat = SetInterruptsTo (DISABLED)
+      currentThread.myProcess.exitStatus = exitStatus
+      oldStatus = SetInterruptsTo (DISABLED)
 
-    currentThread.isUserThread = false
+      -- disconnect the PCB and the thread
+      currentThread.myProcess.myThread = null
+      currentThread.myProcess = null
+      currentThread.isUserThread = false
 
-    -- renable interrupts
-    oldIntStat = SetInterruptsTo (oldIntStat)
-    -- return all page frames to pool
-    frameManager.ReturnAllFrames(&(currentThread.myProcess.addrSpace))
-    -- turn into zombie
-    processManager.TurnIntoZombie(currentThread.myProcess)
-    -- finish thread
-
-    -- disconnect PCB and Thread
-    currentThread.myProcess.myThread = null
-    currentThread.myProcess = null
-
-    ThreadFinish()
+      oldStatus = SetInterruptsTo (oldStatus)
+      frameManager.ReturnAllFrames(&(currentThread.myProcess.addrSpace))
+      processManager.TurnIntoZombie(currentThread.myProcess)
+      ThreadFinish()
     endFunction
 
 -----------------------------  FrameManager  ---------------------------------

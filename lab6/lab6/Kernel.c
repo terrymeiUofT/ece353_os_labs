@@ -1735,6 +1735,7 @@ code Kernel
         numPages: int
         ret: int
         oldUserPC: int
+        i: int
 
       -- print ("function Handle_Sys_Fork is invoked")
       -- nl ()
@@ -1758,7 +1759,7 @@ code Kernel
       -- and run thru each and copy the page
       numPages = currentThread.myProcess.addrSpace.numberOfPages
       frameManager.GetNewFrames (&(newPCB.addrSpace), numPages)
-      for (i=0; i<numPages; i++)
+      for (i=0; i<numPages; i=i+1)
         MemoryCopy (newPCB.addrSpace.ExtractFrameAddr(i), currentThread.myProcess.addrSpace.ExtractFrameAddr(i), PAGE_SIZE)
 		-- set the writable bit
 		if currentThread.myProcess.addrSpace.IsWritable(i)
@@ -1802,7 +1803,7 @@ code Kernel
 	  -- printInt (processID)
 	  -- nl ()
 
-	  for (i=0;i<MAX_NUMBER_OF_PROCESSES-1;i++)
+	  for (i=0; i<MAX_NUMBER_OF_PROCESSES-1; i=i+1)
 	    -- passed in pid and childs parentspid needs to match
 	    if (processID == processManager.processTable[i].pid) && (processManager.processTable[i].parentsPid == currentThread.myProcess.pid)
 	      return processManager.WaitForZombie (&(processManager.processTable[i]))

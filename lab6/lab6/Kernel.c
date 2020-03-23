@@ -975,12 +975,77 @@ code Kernel
         -- This method is passed a ptr to a Process;  It moves it
         -- to the FREE list.
         --
+          FatalError ("should never be called")
+
           processManagerLock.Lock()
           (*p).status = FREE
           freeList.AddToEnd(p)
           aProcessBecameFree.Signal(&processManagerLock)
           processManagerLock.Unlock()
         endMethod
+
+      ----------  ProcessManager . TurnIntoZombie  ----------
+      method TurnIntoZombie(p: ptr to ProcessControlBlock)
+
+      var
+        i: int
+        pParent: ptr to ProcessControlBlock
+
+      pParent = null
+      processManager.processManagerLock.Lock()
+      for(i=0;i<MAX_NUMBER_OF_PROCESSES;i=i+1)
+        -- find children whose zombie
+        if p.pid == processManager.processTable[i].parentsPid && processManager.processTable[i].status == ZOMBIE
+          --
+          processManager.processTable[i].status = FREE
+          processManager.freeList.AddToEnd(&processManager.processTable[i])
+          -- signal the processes thats waiting for PCBs
+          processManager.aProcessBecameFree.Signal(&(processManager.processManagerLock))
+
+        endIf
+
+        -- find parent
+        if p.parentsPid == processManager.processTable[i].pid
+          pParent = &(processManager.processTable[i])
+        endIf
+      endFor
+
+      -- if parent exist(not terminated yet) and active
+      if pParent != null && pParent.status == ACTIVE
+        p.status = ZOMBIE
+        -- parent may be waiting p to exit, broadcast
+        processManager.aProcessDied.Broadcast(&(processManager.processManagerLock))
+      else  -- not active nor exist
+        p.status = FREE
+        processManager.freeList.AddToEnd(p)
+        processManager.aProcessDied.Signal(&(processManager.processManagerLock))
+      endIf
+
+      processManager.processManagerLock.Unlock()
+
+      endMethod
+
+      ----------  ProcessManager . WaitForZombie  ----------
+
+      method WaitForZombie (proc: ptr to ProcessControlBlock) returns int
+        var
+          pExitStatus: int
+
+        processManager.processManagerLock.Lock()
+        while proc.status != ZOMBIE
+          processManager.aProcessDied.Wait(&(processManager.processManagerLock))
+        endWhile
+
+        pExitStatus = proc.exitStatus
+
+        proc.status = FREE
+        processManager.freeList.AddToEnd(proc)
+        processManager.aProcessBecameFree.Signal(&(processManager.processManagerLock))
+
+        processManager.processManagerLock.Unlock()
+
+        return pExitStatus
+      endMethod
 
     endBehavior
 
@@ -1002,7 +1067,29 @@ code Kernel
     -- free the resources held by this process and will terminate the
     -- current thread.
     --
-      FatalError ("ProcessFinish is not implemented")
+    var
+      oldIntStat: int
+
+    -- save exit status
+    currentThread.myProcess.exitStatus = exitStatus
+    -- disable interrupts
+    oldIntStat = SetInterruptsTo (DISABLED)
+
+    currentThread.isUserThread = false
+
+    -- renable interrupts
+    oldIntStat = SetInterruptsTo (oldIntStat)
+    -- return all page frames to pool
+    frameManager.ReturnAllFrames(&(currentThread.myProcess.addrSpace))
+    -- turn into zombie
+    processManager.TurnIntoZombie(currentThread.myProcess)
+    -- finish thread
+
+    -- disconnect PCB and Thread
+    currentThread.myProcess.myThread = null
+    currentThread.myProcess = null
+
+    ThreadFinish()
     endFunction
 
 -----------------------------  FrameManager  ---------------------------------

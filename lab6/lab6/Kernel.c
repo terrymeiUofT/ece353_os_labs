@@ -961,9 +961,9 @@ code Kernel
               aProcessBecameFree.Wait(&processManagerLock)
             endWhile
             newProcess = freeList.Remove()
+            nextPid = nextPid + 1
             (*newProcess).status = ACTIVE
             (*newProcess).pid = nextPid
-            nextPid = nextPid + 1
             processManagerLock.Unlock()
             return newProcess
         endMethod
@@ -1840,7 +1840,7 @@ code Kernel
       for (i=0; i<numPages; i=i+1)
         MemoryCopy (newPCB.addrSpace.ExtractFrameAddr(i), currentThread.myProcess.addrSpace.ExtractFrameAddr(i), PAGE_SIZE)
 		-- set the writable bit
-		if currentThread.myProcess.addrSpace.IsWritable(i) == true
+		if currentThread.myProcess.addrSpace.IsWritable(i)
 		    newPCB.addrSpace.SetWritable (i)
 		else
 			newPCB.addrSpace.ClearWritable (i)

@@ -1050,7 +1050,7 @@ code Kernel
       method GetNewFrames (aPageTable: ptr to AddrSpace, numFramesNeeded: int)
         var i, f, frameAddr: int
           frameManagerLock.Lock()
-          while (framesInUse.NumberOfClearBits() <= numFramesNeeded)
+          while (numberFreeFrames < numFramesNeeded)
             newFramesAvailable.Wait(&frameManagerLock)
           endWhile
           for (i=0; i<numFramesNeeded; i=i+1)

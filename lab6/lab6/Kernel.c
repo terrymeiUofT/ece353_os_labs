@@ -1891,7 +1891,7 @@ code Kernel
 	  -- printInt (processID)
 	  -- nl ()
 
-	  for (i=0; i<MAX_NUMBER_OF_PROCESSES; i=i+1)
+	  for i = 0 to (MAX_NUMBER_OF_PROCESSES - 1) by 1
 	    -- passed in pid and childs parentspid needs to match
 	    if (processID == processManager.processTable[i].pid) && (processManager.processTable[i].parentsPid == currentThread.myProcess.pid)
 	      ret = processManager.WaitForZombie (&(processManager.processTable[i]))

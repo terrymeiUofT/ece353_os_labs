@@ -1896,8 +1896,6 @@ code Kernel
 	    if (processID == processManager.processTable[i].pid) && (processManager.processTable[i].parentsPid == currentThread.myProcess.pid)
 	      ret = processManager.WaitForZombie (&(processManager.processTable[i]))
 	      return ret
-	    else
-	      return -1
 	    endIf
 	  endFor
 	  return -1

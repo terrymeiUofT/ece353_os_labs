@@ -1070,14 +1070,16 @@ code Kernel
       currentThread.myProcess.exitStatus = exitStatus
       oldStatus = SetInterruptsTo (DISABLED)
 
-      -- disconnect the PCB and the thread
-      currentThread.myProcess.myThread = null
-      currentThread.myProcess = null
       currentThread.isUserThread = false
 
       oldStatus = SetInterruptsTo (oldStatus)
       frameManager.ReturnAllFrames(&(currentThread.myProcess.addrSpace))
       processManager.TurnIntoZombie(currentThread.myProcess)
+
+      -- disconnect the PCB and the thread
+      currentThread.myProcess.myThread = null
+      currentThread.myProcess = null
+
       ThreadFinish()
     endFunction
 

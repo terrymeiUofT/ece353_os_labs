@@ -1770,7 +1770,7 @@ code Kernel
 	  endFor
 
 	  oldUserPC = GetOldUserPCFromSystemStack ()
-	  newThread.Fork (ResumeChildAfterFork, oldUserPC)
+	  newThrd.Fork (ResumeChildAfterFork, oldUserPC)
       return newPCB.pid
     endFunction
 
@@ -1796,6 +1796,7 @@ code Kernel
   function Handle_Sys_Join (processID: int) returns int
       var
         i: int
+        ret: int
 
       -- print ("function Handle_Sys_Join is invoked")
       -- nl ()
@@ -1806,11 +1807,13 @@ code Kernel
 	  for (i=0; i<MAX_NUMBER_OF_PROCESSES-1; i=i+1)
 	    -- passed in pid and childs parentspid needs to match
 	    if (processID == processManager.processTable[i].pid) && (processManager.processTable[i].parentsPid == currentThread.myProcess.pid)
-	      return processManager.WaitForZombie (&(processManager.processTable[i]))
+	      ret = processManager.WaitForZombie (&(processManager.processTable[i]))
+	      return ret
 	    else
 	      return -1
 	    endIf
 	  endFor
+	  return -1
     endFunction
 
 -----------------------------  Handle_Sys_Exec  ---------------------------------

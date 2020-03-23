@@ -24,9 +24,9 @@ code TestProgram3
     --     NUMBER_OF_ENVIRONMENT_PAGES = 0
 
 
-      SysExitTest ()
+      --SysExitTest ()
       --BasicForkTest ()
-      --YieldTest ()
+      YieldTest ()
       --ForkTest ()
       --JoinTest1 ()
       --JoinTest2 ()

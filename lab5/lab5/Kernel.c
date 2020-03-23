@@ -1104,16 +1104,27 @@ code Kernel
       ----------  FrameManager . ReturnAllFrames  ----------
 
       method ReturnAllFrames (aPageTable: ptr to AddrSpace)
-        var i, bitNumber, frameAddr: int
+          -- NOT IMPLEMENTED
+          var
+          returnFrameIdx: int
+          returnFrameAddr: int
+          numFramesReturned: int
+          i: int
+
           frameManagerLock.Lock()
-          for (i=0; i<aPageTable.numberOfPages; i=i+1)
-            frameAddr = aPageTable.ExtractFrameAddr(i)
-            bitNumber = (frameAddr - PHYSICAL_ADDRESS_OF_FIRST_PAGE_FRAME)/(PAGE_SIZE)
-            framesInUse.ClearBit(bitNumber)
-          endFor
-          numberFreeFrames = numberFreeFrames + aPageTable.numberOfPages
+          numFramesReturned = (*aPageTable).numberOfPages
+          for i = 0 to numFramesReturned-1
+            returnFrameAddr = aPageTable.ExtractFrameAddr(i)
+            returnFrameIdx = (returnFrameAddr - PHYSICAL_ADDRESS_OF_FIRST_PAGE_FRAME) / PAGE_SIZE -- opposite to allocate
+            framesInUse.ClearBit(returnFrameIdx)
+            endFor
+
+          -- notify waiting threads
           newFramesAvailable.Broadcast(&frameManagerLock)
+          numberFreeFrames = numberFreeFrames + numFramesReturned
           frameManagerLock.Unlock()
+
+
         endMethod
 
     endBehavior

@@ -1882,11 +1882,14 @@ code Kernel
 	  -- printInt (processID)
 	  -- nl ()
 
-	  for i = 0 to (MAX_NUMBER_OF_PROCESSES - 1) by 1
+	  for (i=0; i<MAX_NUMBER_OF_PROCESSES; i=i+1)
+	    -- check if this process is valid
+	    if (processManager.processTable[i].status != FREE)
 	    -- passed in pid and childs parentspid needs to match
-	    if (processID == processManager.processTable[i].pid) && (processManager.processTable[i].parentsPid == currentThread.myProcess.pid)
-	      ret = processManager.WaitForZombie (&(processManager.processTable[i]))
-	      return ret
+	      if (processID == processManager.processTable[i].pid) && (processManager.processTable[i].parentsPid == currentThread.myProcess.pid)
+	        ret = processManager.WaitForZombie (&(processManager.processTable[i]))
+	        return ret
+	      endIf
 	    endIf
 	  endFor
 	  return -1

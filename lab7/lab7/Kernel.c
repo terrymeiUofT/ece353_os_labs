@@ -817,10 +817,10 @@ code Kernel
           addrSpace = new AddrSpace
           addrSpace.Init ()
 -- Uncomment this code later...
-/*
+
           fileDescriptor = new array of ptr to OpenFile
                       { MAX_FILES_PER_PROCESS of null }
-*/
+
         endMethod
 
       ----------  ProcessControlBlock . Print  ----------
@@ -835,14 +835,14 @@ code Kernel
           print ("    myThread = ")
           ThreadPrintShort (myThread)
 -- Uncomment this code later...
-/*
+
           print ("    File Descriptors:\n")
           for i = 0 to MAX_FILES_PER_PROCESS-1
             if fileDescriptor[i]
               fileDescriptor[i].Print ()
             endIf
           endFor
-*/
+
           nl ()
         endMethod
 
@@ -1994,7 +1994,7 @@ code Kernel
 	  endIf
 
 	  -- allocate an openfile object
-	  new_OF_ptr = fileManager.Open (strBuffer)
+	  new_OF_ptr = fileManager.Open (&strBuffer)
 	  if new_OF_ptr == null
 	    return -1
 	  endIf

@@ -1066,6 +1066,7 @@ code Kernel
     --
       var
         oldStatus: int
+        i: int
 
       currentThread.myProcess.exitStatus = exitStatus
       oldStatus = SetInterruptsTo (DISABLED)
@@ -1084,7 +1085,7 @@ code Kernel
             currentThread.myProcess.fileDescriptor[i] = null
         endIf
       endFor
-      
+
       -- disconnect the PCB and the thread
       currentThread.myProcess.myThread = null
       currentThread.myProcess = null

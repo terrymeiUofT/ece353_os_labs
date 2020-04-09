@@ -2330,11 +2330,12 @@ code Kernel
 -----------------------------  Handle_Sys_Close  ---------------------------------
 
   function Handle_Sys_Close (fileDesc: int)
-      print ("function Handle_Sys_Close is invoked")
-      nl ()
-	  print ("fileDesc: ")
-	  printInt (fileDesc)
-	  nl ()
+        if (fileDesc >= 0) && (fileDesc < MAX_FILES_PER_PROCESS)
+            if currentThread.myProcess.fileDescriptor[fileDesc] != null
+                fileManager.Close(currentThread.myProcess.fileDescriptor[fileDesc])
+                currentThread.myProcess.fileDescriptor[fileDesc] = null
+            endIf
+        endIf
     endFunction
 
 -----------------------------  DiskDriver  ---------------------------------

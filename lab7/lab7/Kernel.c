@@ -1076,6 +1076,15 @@ code Kernel
       frameManager.ReturnAllFrames(&(currentThread.myProcess.addrSpace))
       processManager.TurnIntoZombie(currentThread.myProcess)
 
+      -- insert for lab7
+      -- close up all the opened openfile when the process is finished
+      for (i=0; i<MAX_FILES_PER_PROCESS; i=i+1)
+        if currentThread.myProcess.fileDescriptor[i] != null
+            fileManager.Close(currentThread.myProcess.fileDescriptor[i])
+            currentThread.myProcess.fileDescriptor[i] = null
+        endIf
+      endFor
+      
       -- disconnect the PCB and the thread
       currentThread.myProcess.myThread = null
       currentThread.myProcess = null
@@ -1814,6 +1823,7 @@ code Kernel
         ret: int
         oldUserPC: int
         i: int
+        temp_OF: ptr to OpenFile
 
       -- print ("function Handle_Sys_Fork is invoked")
       -- nl ()
@@ -1832,6 +1842,15 @@ code Kernel
 
       -- initialize stackTop pointer
       newThrd.stackTop = & (newThrd.systemStack[SYSTEM_STACK_SIZE-1])
+
+      -- copy filedescriptor contents from parent to child
+      for (i=0; i<MAX_FILES_PER_PROCESS; i=i+1)
+        if currentThread.myProcess.fileDescriptor[i] != null
+            temp_OF = currentThread.myProcess.fileDescriptor[i]
+            newThrd.myProcess.fileDescriptor[i] = temp_OF
+            temp_OF.numberOfUsers = temp_OF.numberOfUsers + 1
+         endIf
+      endFor
 
       -- make a copy of the parents virtual address space
       -- and run thru each and copy the page

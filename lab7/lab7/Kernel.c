@@ -2298,18 +2298,19 @@ code Kernel
 
 	  -- Check the fileDesc argument and get a pointer to the OpenFile object.
 	  new_OF_ptr = currentThread.myProcess.fileDescriptor[fileDesc]
-	  sizeOfFile = new_OF_ptr.fcb.sizeOfFileInBytes
-
+	  
 	  if fileDesc < 0 || fileDesc >= MAX_FILES_PER_PROCESS
 	    fileManager.fileManagerLock.Unlock()
 	    return -1
 	  endIf
 
 	  -- Make sure the file is open.
-	  if currentThread.myProcess.fileDescriptor[fileDesc] == null
+	  if new_OF_ptr == null
 	    fileManager.fileManagerLock.Unlock()
 	    return -1
 	  endIf
+
+	  sizeOfFile = new_OF_ptr.fcb.sizeOfFileInBytes
 
 	  -- Deal with the possibility that the new current position is less than -1.
 	  -- Deal with the possibility that the new current position is greater than the file size.

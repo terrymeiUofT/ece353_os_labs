@@ -208,7 +208,7 @@ code Kernel
         threadPtr: ptr to Thread
       threadPtr = threadManager.GetANewThread ()
       threadPtr.Init ("UserProgram")
-      threadPtr.Fork (StartUserProcess, "TestProgram3" asInteger)
+      threadPtr.Fork (StartUserProcess, "TestProgram4" asInteger)
     endFunction
 
   function StartUserProcess ()
@@ -224,7 +224,7 @@ code Kernel
       currentThread.myProcess = pcbPtr
       pcbPtr.myThread = currentThread
 
-      exePtr = fileManager.Open ("TestProgram3")
+      exePtr = fileManager.Open ("TestProgram4")
       initUserPC = exePtr.LoadExecutable (&(pcbPtr.addrSpace))
       fileManager.Close (exePtr)
 

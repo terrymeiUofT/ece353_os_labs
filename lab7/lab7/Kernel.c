@@ -1988,7 +1988,7 @@ code Kernel
 	        break
 	    endIf
 	  endFor
-	  if empty_index == -1:
+	  if empty_index == -1
 	    return -1
 	  endIf
 
@@ -2046,7 +2046,7 @@ code Kernel
 	  nextPosInFile = FileToRead.currentPos
 	  sizeOfFile = FileToRead.fcb.sizeOfFileInBytes
 
-	  whlie true
+	  while true
 	    -- Compute the size of this chunk...
 	    thisChunkSize = PAGE_SIZE - offset
 	    if nextPosInFile + thisChunkSize > sizeOfFile
@@ -2193,7 +2193,7 @@ code Kernel
 	  nextPosInFile = FileToWrite.currentPos
 	  sizeOfFile = FileToWrite.fcb.sizeOfFileInBytes
 
-	  whlie true
+	  while true
 	    -- Compute the size of this chunk...
 	    thisChunkSize = PAGE_SIZE - offset
 	    if nextPosInFile + thisChunkSize > sizeOfFile
@@ -2301,7 +2301,7 @@ code Kernel
 -----------------------------  Handle_Sys_Seek  ---------------------------------
 
   function Handle_Sys_Seek (fileDesc: int, newCurrentPos: int) returns int
-      var
+      -- var
 
 
       print ("function Handle_Sys_Seek is invoked")

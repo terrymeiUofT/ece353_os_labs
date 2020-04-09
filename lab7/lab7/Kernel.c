@@ -2094,7 +2094,7 @@ code Kernel
 	  nextPosInFile = FileToRead.currentPos
 	  sizeOfFile = FileToRead.fcb.sizeOfFileInBytes
 
-	  whlie true
+	  while true
 	    -- Compute the size of this chunk...
 	    thisChunkSize = PAGE_SIZE - offset
 	    if nextPosInFile + thisChunkSize > sizeOfFile
@@ -2241,7 +2241,7 @@ code Kernel
 	  nextPosInFile = FileToWrite.currentPos
 	  sizeOfFile = FileToWrite.fcb.sizeOfFileInBytes
 
-	  whlie true
+	  while true
 	    -- Compute the size of this chunk...
 	    thisChunkSize = PAGE_SIZE - offset
 	    if nextPosInFile + thisChunkSize > sizeOfFile

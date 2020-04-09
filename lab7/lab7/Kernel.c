@@ -2294,7 +2294,7 @@ code Kernel
         new_OF_ptr: ptr to OpenFile
 
 	  -- Lock the FileManager.
-	  fileManager.fileManager.Lock()
+	  fileManager.fileManagerLock.Lock()
 
 	  -- Check the fileDesc argument and get a pointer to the OpenFile object.
 	  new_OF_ptr = currentThread.myProcess.fileDescriptor[fileDesc]

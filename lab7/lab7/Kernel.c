@@ -2027,9 +2027,8 @@ code Kernel
       nl ()
 	  ret = (*currentThread).myProcess.addrSpace.GetStringFromVirtual(&strBuffer, buffer asInteger, MAX_STRING_SIZE)
 	  if ret < 0
-	    FatalError ("Encounter an error when calling GetStringFromVirtual")
+	    return -1
 	  endIf
-
 	  if fileDesc < 0 || fileDesc >= MAX_FILES_PER_PROCESS
 	    return -1
 	  elseIf currentThread.myProcess.fileDescriptor[fileDesc] == null
@@ -2175,9 +2174,8 @@ code Kernel
       nl ()
 	  ret = (*currentThread).myProcess.addrSpace.GetStringFromVirtual(&strBuffer, buffer asInteger, MAX_STRING_SIZE)
 	  if ret < 0
-	    FatalError ("Encounter an error when calling GetStringFromVirtual")
+	    return -1
 	  endIf
-
 	  if fileDesc < 0 || fileDesc >= MAX_FILES_PER_PROCESS
 	    return -1
 	  elseIf currentThread.myProcess.fileDescriptor[fileDesc] == null

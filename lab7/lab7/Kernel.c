@@ -829,7 +829,7 @@ code Kernel
         --
         -- Print this ProcessControlBlock using several lines.
         --
-        -- var i: int
+        var i: int
           self.PrintShort ()
           addrSpace.Print ()
           print ("    myThread = ")

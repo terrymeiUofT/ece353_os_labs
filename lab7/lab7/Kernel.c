@@ -1971,6 +1971,7 @@ code Kernel
 		ret: int
 		strBuffer: array [MAX_STRING_SIZE] of char
 		empty_index: int
+		i: int
 		new_OF_ptr: ptr to OpenFile
 
 	  print ("function Handle_Sys_Open is invoked")
@@ -1993,7 +1994,7 @@ code Kernel
 	  endIf
 
 	  -- allocate an openfile object
-	  new_OF_ptr = FileManager.Open (strBuffer)
+	  new_OF_ptr = fileManager.Open (strBuffer)
 	  if new_OF_ptr == null
 	    return -1
 	  endIf
@@ -2017,6 +2018,7 @@ code Kernel
 	    FileToRead: ptr to OpenFile
 	    nextPosInFile: int
 	    sizeOfFile: int
+	    thisChunkSize: int
 	    physical_addr: int
 	    destAddr: int
 	    read_ret: bool
@@ -2050,7 +2052,7 @@ code Kernel
 	    -- Compute the size of this chunk...
 	    thisChunkSize = PAGE_SIZE - offset
 	    if nextPosInFile + thisChunkSize > sizeOfFile
-	        thisChunkSize = sizeOfFileInBytes - nextPosInFile
+	        thisChunkSize = sizeOfFile - nextPosInFile
 	    endIf
 	    if copiedSoFar + thisChunkSize > sizeInBytes
 	        thisChunkSize = sizeInBytes - copiedSoFar

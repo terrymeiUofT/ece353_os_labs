@@ -2306,7 +2306,7 @@ code Kernel
 	  endIf
 
 	  -- Make sure the file is open.
-	  if currentThread.myProcess.fileDescriptor[fileDesc] == null:
+	  if currentThread.myProcess.fileDescriptor[fileDesc] == null
 	    fileManager.fileManagerLock.Unlock()
 	    return -1
 	  endIf

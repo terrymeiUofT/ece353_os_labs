@@ -2149,8 +2149,8 @@ code Kernel
 
   function Handle_Sys_Write (fileDesc: int, buffer: ptr to char, sizeInBytes: int) returns int
       var
-		ret: int
-		strBuffer: array [MAX_STRING_SIZE] of char
+		-- ret: int
+		-- strBuffer: array [MAX_STRING_SIZE] of char
 	    virtAddr: int
 	    virtPage: int
 	    offset: int
@@ -2163,12 +2163,6 @@ code Kernel
 	    destAddr: int
 	    write_ret: bool
 
-      print ("function Handle_Sys_Write is invoked")
-      nl ()
-	  ret = (*currentThread).myProcess.addrSpace.GetStringFromVirtual(&strBuffer, buffer asInteger, MAX_STRING_SIZE)
-	  if ret < 0
-	    return -1
-	  endIf
 	  if fileDesc < 0 || fileDesc >= MAX_FILES_PER_PROCESS
 	    return -1
 	  elseIf currentThread.myProcess.fileDescriptor[fileDesc] == null
@@ -2295,27 +2289,47 @@ code Kernel
 -----------------------------  Handle_Sys_Seek  ---------------------------------
 
   function Handle_Sys_Seek (fileDesc: int, newCurrentPos: int) returns int
-      -- var
-
-
-      print ("function Handle_Sys_Seek is invoked")
-      nl ()
+      var
+        sizeOfFile: int
+        new_OF_ptr: ptr to OpenFile
 
 	  -- Lock the FileManager.
+	  fileManager.fileManager.Lock()
 
 	  -- Check the fileDesc argument and get a pointer to the OpenFile object.
+	  new_OF_ptr = currentThread.myProcess.fileDescriptor[fileDesc]
+	  sizeOfFile = new_OF_ptr.fcb.sizeOfFileInBytes
+
+	  if fileDesc < 0 || fileDesc >= MAX_FILES_PER_PROCESS
+	    fileManager.fileManagerLock.Unlock()
+	    return -1
+	  endIf
 
 	  -- Make sure the file is open.
-
-	  -- Deal with the possibility that the new current position is equal to -1.
+	  if currentThread.myProcess.fileDescriptor[fileDesc] == null:
+	    fileManager.fileManagerLock.Unlock()
+	    return -1
+	  endIf
 
 	  -- Deal with the possibility that the new current position is less than -1.
-
 	  -- Deal with the possibility that the new current position is greater than the file size.
+	  if newCurrentPos < -1 || newCurrentPos > sizeOfFile
+	    fileManager.fileManagerLock.Unlock()
+	    return -1
+	  endIf
+
+	  -- Deal with the possibility that the new current position is equal to -1.
+	  if newCurrentPos == -1
+	    new_OF_ptr.currentPos = sizeOfFile
+	    fileManager.fileManagerLock.Unlock()
+	    return sizeOfFile
+	  endIf
 
 	  -- Update the current position.
+	  new_OF_ptr.currentPos = newCurrentPos
 
-      return 8000
+	  fileManager.fileManagerLock.Unlock()
+      return newCurrentPos
     endFunction
 
 -----------------------------  Handle_Sys_Close  ---------------------------------

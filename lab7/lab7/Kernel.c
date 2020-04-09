@@ -2100,7 +2100,7 @@ code Kernel
 	    -- Compute the size of this chunk...
 	    thisChunkSize = PAGE_SIZE - offset
 	    if nextPosInFile + thisChunkSize > sizeOfFile
-	        thisChunkSize = sizeOfFileInBytes - nextPosInFile
+	        thisChunkSize = sizeOfFile - nextPosInFile
 	    endIf
 	    if copiedSoFar + thisChunkSize > sizeInBytes
 	        thisChunkSize = sizeInBytes - copiedSoFar
@@ -2166,6 +2166,7 @@ code Kernel
 	    FileToWrite: ptr to OpenFile
 	    nextPosInFile: int
 	    sizeOfFile: int
+	    thisChunkSize: int
 	    physical_addr: int
 	    destAddr: int
 	    write_ret: bool
@@ -2199,7 +2200,7 @@ code Kernel
 	    -- Compute the size of this chunk...
 	    thisChunkSize = PAGE_SIZE - offset
 	    if nextPosInFile + thisChunkSize > sizeOfFile
-	        thisChunkSize = sizeOfFileInBytes - nextPosInFile
+	        thisChunkSize = sizeOfFile - nextPosInFile
 	    endIf
 	    if copiedSoFar + thisChunkSize > sizeInBytes
 	        thisChunkSize = sizeInBytes - copiedSoFar
@@ -2247,7 +2248,7 @@ code Kernel
 	    -- Compute the size of this chunk...
 	    thisChunkSize = PAGE_SIZE - offset
 	    if nextPosInFile + thisChunkSize > sizeOfFile
-	        thisChunkSize = sizeOfFileInBytes - nextPosInFile
+	        thisChunkSize = sizeOfFile - nextPosInFile
 	    endIf
 	    if copiedSoFar + thisChunkSize > sizeInBytes
 	        thisChunkSize = sizeInBytes - copiedSoFar

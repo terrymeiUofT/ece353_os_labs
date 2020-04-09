@@ -2255,9 +2255,9 @@ code Kernel
 	        return -1
 	    endIf
 
-	    -- Do the read...
+	    -- Do the write...
 	    -- set dirtybit for this page
-	    currentThread.myProcess.addrSpace.SetDirty(virtPage)
+	    -- currentThread.myProcess.addrSpace.SetDirty(virtPage)
 
 	    -- set referencebit for this page
 	    currentThread.myProcess.addrSpace.SetReferenced(virtPage)

@@ -1932,7 +1932,6 @@ code Kernel
       -- nl ()
 	  ret = currentThread.myProcess.addrSpace.GetStringFromVirtual (&strBuffer, filename asInteger, MAX_STRING_SIZE)
 	  if ret < 0
-	    FatalError ("Encounter an error when calling GetStringFromVirtual")
 		return -1
 	  endIf
       -- print ("filename: ")

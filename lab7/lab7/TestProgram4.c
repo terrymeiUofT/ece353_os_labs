@@ -287,7 +287,7 @@ code TestProgram4
 
       print ("Reading files which are not open and invalid file descriptors...\n")
 
-      i = Sys_Read (0, charPtr, 30)
+      i = Sys_Read (1, charPtr, 30)
       if i == -1
         print ("Okay\n")
       else

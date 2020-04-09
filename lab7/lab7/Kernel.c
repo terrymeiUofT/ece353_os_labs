@@ -2008,8 +2008,8 @@ code Kernel
 
   function Handle_Sys_Read (fileDesc: int, buffer: ptr to char, sizeInBytes: int) returns int
       var
-		ret: int
-		strBuffer: array [MAX_STRING_SIZE] of char
+		-- ret: int
+		-- strBuffer: array [MAX_STRING_SIZE] of char
 	    virtAddr: int
 	    virtPage: int
 	    offset: int

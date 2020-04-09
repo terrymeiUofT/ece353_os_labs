@@ -1974,7 +1974,6 @@ code Kernel
 		i: int
 		new_OF_ptr: ptr to OpenFile
 
-	  print ("function Handle_Sys_Open is invoked")
       nl()
 	  ret = (*currentThread).myProcess.addrSpace.GetStringFromVirtual(&strBuffer, filename asInteger, MAX_STRING_SIZE)
 	  if ret < 0
@@ -2023,12 +2022,6 @@ code Kernel
 	    destAddr: int
 	    read_ret: bool
 
-      print ("function Handle_Sys_Read is invoked")
-      nl ()
-	  ret = (*currentThread).myProcess.addrSpace.GetStringFromVirtual(&strBuffer, buffer asInteger, MAX_STRING_SIZE)
-	  if ret < 0
-	    return -1
-	  endIf
 	  if fileDesc < 0 || fileDesc >= MAX_FILES_PER_PROCESS
 	    return -1
 	  elseIf currentThread.myProcess.fileDescriptor[fileDesc] == null
